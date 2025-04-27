@@ -184,7 +184,6 @@ VALUES
   ('Tiếng Anh nâng cao – Bài 5: Giao tiếp chuyên sâu','Thực hành thuyết trình và tranh luận',         12);
 
 
-
 INSERT INTO Enrollments (EnrollmentDate, LearnerID, CourseID)
 VALUES
   ('2025-04-01',  1,  8),
