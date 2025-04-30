@@ -4,7 +4,7 @@ import hashlib
 import os
 from dotenv import load_dotenv
 from style.sidebar import SideBar
-
+import bcrypt
 
 load_dotenv()
 MYSQL_USER = os.getenv("MYSQL_USER")
@@ -23,8 +23,16 @@ def connect_db():
     )
 
 # --- password hashing ---
-def hash_password(password):
-    return hashlib.sha256(password.encode()).hexdigest()
+
+
+def hash_password(password: str) -> str:
+    salt = bcrypt.gensalt()
+    hashed = bcrypt.hashpw(password.encode('utf-8'), salt)
+    return hashed.decode('utf-8') 
+
+def check_password(password: str, hashed_password: str) -> bool:
+    return bcrypt.checkpw(password.encode('utf-8'), hashed_password.encode('utf-8'))
+
 
 # --- user sign up ---
 def register_user(account_name: str,
@@ -83,14 +91,14 @@ def verify_user(username, password, role):
         cursor.execute("SELECT Password FROM Learners WHERE AccountName = %s", (username,))
         data = cursor.fetchone()
         conn.close()
-        if data and data[0] == hash_password(password):
+        if data and check_password(password, data[0]):
             return True
         return False
     elif role == "Instructor":
         cursor.execute("SELECT Password FROM Instructors WHERE AccountName = %s", (username,))
         data = cursor.fetchone()
         conn.close()
-        if data and data[0] == hash_password(password):
+        if data and check_password(password, data[0]):
             return True
         return False
 
