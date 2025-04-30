@@ -1,5 +1,5 @@
 import streamlit as st
-from style.CSSHandle import load_css
+
 from streamlit_extras.switch_page_button import switch_page
 import os
 import toml
@@ -12,8 +12,15 @@ class Visual:
     LOGO = THEME + "_logo.webp" if THEME else None
     CSS = "style.css"
     
+    @staticmethod
+    def load_css(css: str):
+        with open(css) as f:
+            st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
     @classmethod
-    def custom_sidebar(cls):
+    def custom_sidebar(cls, css = None):
+        if not css:
+            cls.initial()
         with st.sidebar:
             # Logo for web
             if cls.LOGO:
@@ -46,7 +53,8 @@ class Visual:
     
     @classmethod
     def initial(cls):
-        load_css(os.path.join(cls.FOLDER, cls.CSS))
-        cls.custom_sidebar()
+        if cls.CSS:
+            cls.load_css(os.path.join(cls.FOLDER, cls.CSS))
+        cls.custom_sidebar(cls.CSS)
 
     

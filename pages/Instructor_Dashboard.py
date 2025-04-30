@@ -1,3 +1,4 @@
 import streamlit as st
-from style.sidebar import SideBar
-SideBar.show()
+from style.ui import Visual
+
+Visual.initial()
