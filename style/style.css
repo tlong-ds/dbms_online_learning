@@ -1,0 +1,25 @@
+.stButton > button {
+    width: 100%;
+    height: 50px;
+    margin: 5px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    border-radius: 5px;
+    
+}
+
+/* Hide default sidebar navigation */
+[data-testid="stSidebarNav"] {display: none !important;}
+            
+/* Hide default sidebar content */
+.css-1d391kg {display: none}
+section[data-testid="stSidebar"] .css-1d391kg {display: none}
+
+/* Hide collapse control */
+[data-testid="collapsedControl"] {display: none}
+
+/* Additional selectors to ensure navigation is hidden */
+.css-1544g2n.e1fqkh3o4 {display: none !important;}
+.css-1adrfps.e1fqkh3o4 {display: none !important;}
