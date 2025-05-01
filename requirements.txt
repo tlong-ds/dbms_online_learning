@@ -11,3 +11,5 @@ st_pages
 streamlit.extras
 python-dotenv
 fpdf
+mysql-connector-python
+streamlit_extras
