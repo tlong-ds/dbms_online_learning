@@ -1,5 +1,5 @@
 import streamlit as st
-
+import streamlit.components.v1 as components
 from streamlit_extras.switch_page_button import switch_page
 import os
 import toml
@@ -7,9 +7,10 @@ import toml
 
 
 class Visual:
+    CONFIG = toml.load(".streamlit/config.toml")
     FOLDER = "style"
-    THEME = toml.load(".streamlit/config.toml")["theme"]["base"] 
-    LOGO = THEME + "_logo.webp" if THEME else None
+    THEME = CONFIG["theme"]["base"] 
+    
     CSS = "style.css"
     
     @staticmethod
@@ -21,10 +22,22 @@ class Visual:
     def custom_sidebar(cls, css = None):
         if not css:
             cls.initial()
+        components.html("""
+        <script>
+            const theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+            const input = window.parent.document.querySelector('input[data-baseweb="input"]');
+            if (input) {
+                input.value = theme;
+                input.dispatchEvent(new Event("input", { bubbles: true }));
+            }
+        </script>
+        """, height=0)
+        st.session_state.theme = cls.THEME
         with st.sidebar:
             # Logo for web
-            if cls.LOGO:
-                st.image(os.path.join(cls.FOLDER, cls.LOGO))
+            logo_path = os.path.join(cls.FOLDER, f"{st.session_state.theme}_logo.webp")
+            if os.path.exists(logo_path):  # This loads by default using config.toml
+                st.image(logo_path)
             # Learner Navigation
             if st.session_state.login == True and st.session_state.role == "Learner":
                 if st.button("Dashboard"):
