@@ -1,15 +1,15 @@
 import streamlit as st
-#from streamlit_extras.switch_page_button import switch_page
-#from style.sidebar import SideBar
-from pages.Authentification import show_auth_ui
-# st.session_state["login"] = "Learner"
-# SideBar.show()
+from streamlit_extras.switch_page_button import switch_page
+from style.ui import Visual
+import os
+import toml
+
+if "login" not in st.session_state:
+    st.session_state["login"] = None
+Visual.initial()
 
 def main():
-    if "login" not in st.session_state:
-        st.session_state["login"] = None
-    show_auth_ui()
-    
+    switch_page("Authentification")
 
 if __name__ == "__main__":
     main()

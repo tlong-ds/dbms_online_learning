@@ -1,0 +1,9 @@
+[theme]
+base = "light"
+
+[runner]
+magicEnabled = true
+fastReruns = true
+
+[server]
+runOnSave = true
