@@ -38,31 +38,45 @@ class Visual:
             logo_path = os.path.join(cls.FOLDER, f"{st.session_state.theme}_logo.webp")
             if os.path.exists(logo_path):  # This loads by default using config.toml
                 st.image(logo_path)
-            # Learner Navigation
-            if st.session_state.login == True and st.session_state.role == "Learner":
-                if st.button("Dashboard"):
-                    switch_page("Learner Dashboard")
-                if st.button("Courses"):
-                    switch_page("Learner Courses") 
-                if st.button("Notebook"):
-                    switch_page("Learner Notebook")
-                if st.button("Timer"):
-                    switch_page("Learner Timer")
-            # Instructor
-            if st.session_state.login == True and st.session_state.role == "Instructor":
-                if st.button("Dashboard"):
-                    switch_page("Instructor Dashboard")
-                if st.button("Courses"):
-                    switch_page("Instructor Courses") 
-            st.divider()
-            if st.button("Settings"):
-                switch_page("Settings")
-            if st.button("Feedback"):
-                switch_page("Feedback")
-            st.divider()
-            if st.session_state.login == True:
+
+            if st.session_state.login:
+                # User Information
+                st.markdown(f'<div style="font-size: 25px; font-weight: bold;">Welcome, {st.session_state.name}!</div>', unsafe_allow_html=True)
+                st.markdown(f'<div style="font-size: 20px; ">Role: {st.session_state.role}</div>', unsafe_allow_html=True)
+                st.divider()
+                # Learner Navigation
+                if st.session_state.role == "Learner":
+                    if st.button("Dashboard"):
+                        switch_page("Learner Dashboard")
+                    if st.button("Courses"):
+                        switch_page("Learner Courses") 
+                    if st.button("Notebook"):
+                        switch_page("Learner Notebook")
+                    if st.button("Timer"):
+                        switch_page("Learner Timer")
+                # Instructor
+                if st.session_state.role == "Instructor":
+                    if st.button("Dashboard"):
+                        switch_page("Instructor Dashboard")
+                    if st.button("Courses"):
+                        switch_page("Instructor Courses") 
+                st.divider()
+                if st.button("Settings"):
+                    switch_page("Settings")
+                if st.button("Feedback"):
+                    switch_page("Feedback")
+                st.divider()
+                
                 if st.button("Log out"):
-                    pass
+                    st.session_state.login = False
+                    st.session_state.role = None
+                    st.session_state.name = None
+                    st.session_state.email = None
+                    st.session_state.phone = None
+                    switch_page("Authentification")
+                    
+            else:
+                st.markdown('<div style="text-align: center;">Please login to continue!</div>', unsafe_allow_html=True)
     
     @classmethod
     def initial(cls):

@@ -3,7 +3,7 @@ bcrypt
 pandas
 numpy
 beautifulsoup4
-sqlalchemy
+pymysql
 matplotlib
 requests
 streamlit_lottie

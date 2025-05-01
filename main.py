@@ -4,17 +4,12 @@ from style.ui import Visual
 import os
 import toml
 
-st.session_state["login"] = True
-st.session_state["name"] = "Ly Thanh Long"
-st.session_state["role"] = "Learner"
-
-
+if "login" not in st.session_state:
+    st.session_state["login"] = None
 Visual.initial()
 
-
 def main():
-    pass
-    
+    switch_page("Authentification")
 
 if __name__ == "__main__":
     main()
