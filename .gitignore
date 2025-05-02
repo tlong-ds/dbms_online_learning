@@ -1,5 +1,6 @@
 __pycache__/
 **/__pycache__/
-.streamlit/*.toml
+.streamlit/config.toml
+.streamlit/secrets.toml
 .DS_Store
 .env
