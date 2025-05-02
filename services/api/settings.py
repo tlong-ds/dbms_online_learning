@@ -4,7 +4,7 @@ import toml
 import os
 from dotenv import load_dotenv
 import pymysql
-from services.api.db.auth import verify_user, hash_password
+from services.api.db.auth import update_password, update_user_info
 
 
 # Settings for Appearance
@@ -27,27 +27,6 @@ def save_mode():
             st.rerun()
     except Exception as e:
         st.error(f"Failed to change mode: {str(e)}")
-
-
-def update_user_info(username, role, name, email, extra):
-    conn = connect_db()
-    cursor = conn.cursor()
-    if role == "Learner":
-        cursor.execute("""
-            UPDATE Learners SET LearnerName = %s, Email = %s, PhoneNumber = %s WHERE AccountName = %s
-        """, (name, email, extra, username))
-        st.session_state.name = name
-        st.session_state.email = email
-        st.session_state.phone = extra
-    elif role == "Instructor":
-        cursor.execute("""
-            UPDATE Instructors SET InstructorName = %s, Email = %s, Expertise = %s WHERE AccountName = %s
-        """, (name, email, extra, username))
-        st.session_state.name = name
-        st.session_state.email = email
-        st.session_state.phone = extra
-    conn.commit()
-    conn.close()
 
 # Setting for Personal Information
 def info():
@@ -90,8 +69,6 @@ def info():
         )
         st.success("Profile updated successfully!")
 
-    
-
 # Setting for Security
 def security():
     st.header("Change Password")
@@ -103,28 +80,11 @@ def security():
         submitted = st.form_submit_button("Change Password")
 
     if submitted:
-        if verify_user(st.session_state.username, cp, st.session_state.role):
-            if npw == cf:
-                conn = connect_db()
-                cursor = conn.cursor()
-                if st.session_state.role == "Learner":
-                    cursor.execute(
-                        "UPDATE Learners SET Password = %s WHERE AccountName = %s",
-                        (hash_password(npw), st.session_state.username)
-                    )
-                else:
-                    cursor.execute(
-                        "UPDATE Instructors SET Password = %s WHERE AccountName = %s",
-                        (hash_password(npw), st.session_state.username)
-                    )
-                conn.commit()
-                conn.close()
-                st.success("Password changed successfully")
-            else:
-                st.error("New password and confirm password do not match.")
-        else:
-            st.error("Current password is incorrect.")
-
+        update_password(st.session_state.username,
+                        cp, 
+                        st.session_state.role, 
+                        npw, 
+                        cf)
 
 # Setting for About
 def about():

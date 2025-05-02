@@ -119,4 +119,46 @@ def get_user_info(username, role):
         st.session_state.email = data[1]
         st.session_state.expertise = data[2]
         conn.close()
+
+def update_user_info(username, role, name, email, extra):
+    conn = connect_db()
+    cursor = conn.cursor()
+    if role == "Learner":
+        cursor.execute("""
+            UPDATE Learners SET LearnerName = %s, Email = %s, PhoneNumber = %s WHERE AccountName = %s
+        """, (name, email, extra, username))
+        st.session_state.name = name
+        st.session_state.email = email
+        st.session_state.phone = extra
+    elif role == "Instructor":
+        cursor.execute("""
+            UPDATE Instructors SET InstructorName = %s, Email = %s, Expertise = %s WHERE AccountName = %s
+        """, (name, email, extra, username))
+        st.session_state.name = name
+        st.session_state.email = email
+        st.session_state.phone = extra
+    conn.commit()
+    conn.close()
     
+def update_password(username, old_password, role, new_password, confirmed_new_password):
+    if verify_user(username, old_password, role):
+        if new_password == confirmed_new_password:
+            conn = connect_db()
+            cursor = conn.cursor()
+            if role == "Learner":
+                cursor.execute(
+                    "UPDATE Learners SET Password = %s WHERE AccountName = %s",
+                    (hash_password(new_password), username)
+                )
+            else:
+                cursor.execute(
+                    "UPDATE Instructors SET Password = %s WHERE AccountName = %s",
+                    (hash_password(new_password), username)
+                )
+            conn.commit()
+            conn.close()
+            st.success("Password changed successfully")
+        else:
+            st.error("New password and confirm password do not match.")
+    else:
+        st.error("Current password is incorrect.")
