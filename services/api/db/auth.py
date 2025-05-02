@@ -104,6 +104,7 @@ def get_user_info(username, role):
     if role == "Learner":
         cursor.execute("SELECT LearnerName, Email, PhoneNumber FROM Learners WHERE AccountName = %s", (username,))
         data = cursor.fetchone()
+        st.session_state.username = username
         st.session_state.role = role
         st.session_state.name = data[0]
         st.session_state.email = data[1]
@@ -112,6 +113,7 @@ def get_user_info(username, role):
     elif role == "Instructor":
         cursor.execute("SELECT InstructorName, Email, Expertise FROM Instructors WHERE AccountName = %s", (username,))
         data = cursor.fetchone()
+        st.session_state.username = username
         st.session_state.role = role
         st.session_state.name = data[0]
         st.session_state.email = data[1]

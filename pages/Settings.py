@@ -12,8 +12,10 @@ st.set_page_config(
 
 Visual.initial()
 
+if "view" not in st.session_state:
+    st.session_state.view = "info"
+
 def show_settings():
-    st.session_state.view = None
     col1, col2 = st.columns([1, 4])
     with col1:
         st.header("Settings")
