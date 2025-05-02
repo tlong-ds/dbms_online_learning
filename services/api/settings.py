@@ -4,23 +4,9 @@ import toml
 import os
 from dotenv import load_dotenv
 import pymysql
-from .db.auth import verify_user, hash_password
+from services.api.db.auth import verify_user, hash_password
 
-load_dotenv()
-MYSQL_USER = os.getenv("MYSQL_USER")
-MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD")
-MYSQL_HOST = os.getenv("MYSQL_HOST")
-MYSQL_DB = os.getenv("MYSQL_DB")
-MYSQL_PORT = int(os.getenv("MYSQL_PORT"))
 
-def connect_db():
-    return pymysql.connect(
-        host=MYSQL_HOST,
-        user=MYSQL_USER,
-        password=MYSQL_PASSWORD,
-        database=MYSQL_DB,
-        port=MYSQL_PORT
-    )
 # Settings for Appearance
 def appearance():
     with st.form("appearance"):
@@ -37,8 +23,8 @@ def save_mode():
             Visual.CONFIG["theme"]["base"] = selected_mode
             with open('.streamlit/config.toml', 'w') as f:
                 toml.dump(Visual.CONFIG, f)
-            st.rerun()
             st.success(f"Change mode successfully!")
+            st.rerun()
     except Exception as e:
         st.error(f"Failed to change mode: {str(e)}")
 
@@ -63,7 +49,7 @@ def update_user_info(username, role, name, email, extra):
     conn.commit()
     conn.close()
 
-# Setting for Appearance
+# Setting for Personal Information
 def info():
     st.header("Account Settings")
     with st.form("info_form"):
@@ -142,10 +128,19 @@ def security():
 
 # Setting for About
 def about():
-    pass
-
-
-
-
-    
-
+    st.header("The Learning House")
+    st.markdown("<p>The Best Learning Platform for Learners and Instructors!</p>", unsafe_allow_html=True)
+    st.markdown('''<b>Our Missions</b>: Empowering education through open-source innovation
+    ''', unsafe_allow_html=True)
+    st.markdown('''<b>Meet Our Specialists</b>:                           
+    ''', unsafe_allow_html=True)
+    st.markdown('''
+                
+    - Doan Quoc Bao
+                
+    - Ly Thanh Long
+                
+    - Ha Quang Minh
+                
+    - Tran Anh Tuan                             
+    ''', unsafe_allow_html=True)

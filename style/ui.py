@@ -39,12 +39,18 @@ class Visual:
             # Logo for web
             logo_path = os.path.join(cls.FOLDER, f"{st.session_state.theme}_logo.webp")
             if os.path.exists(logo_path):  # This loads by default using config.toml
-                st.image(logo_path)
+                col1, col2 = st.columns([1, 4])
+                with col1:
+                    st.image(logo_path, use_column_width="always", output_format="PNG")
+                with col2:
+                    st.markdown(f'<div style="font-size: 20px; font-weight: bold; line-height: 1;">The</div>', unsafe_allow_html=True)
+                    st.markdown(f'<div style="font-size: 20px; font-weight: bold; line-height: 1;">Learning House</div>', unsafe_allow_html=True)
+
 
             if st.session_state.login:
                 # User Information
-                st.markdown(f'<div style="font-size: 25px; font-weight: bold;">Welcome, {st.session_state.name}!</div>', unsafe_allow_html=True)
-                st.markdown(f'<div style="font-size: 20px; ">Role: {st.session_state.role}</div>', unsafe_allow_html=True)
+                st.markdown(f'<div style="font-size: 23px; font-weight: bold;">Welcome, {st.session_state.name}!</div>', unsafe_allow_html=True)
+                st.markdown(f'<div style="font-size: 18px; ">Role: {st.session_state.role}</div>', unsafe_allow_html=True)
                 st.divider()
                 # Learner Navigation
                 if st.session_state.role == "Learner":

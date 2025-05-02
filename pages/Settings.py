@@ -2,6 +2,7 @@ import streamlit as st
 from style.ui import Visual
 from services.api.settings import info, security, appearance, about
 import toml
+import os
 
 st.set_page_config(
     page_title="Setting",

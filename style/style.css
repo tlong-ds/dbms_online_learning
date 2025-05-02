@@ -1,3 +1,39 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
+
+@font-face {
+    font-family: "SF-Pro-Display-Regular";
+    src: url('./fonts/SF-Pro-Display-Medium.otf') format('otf');
+}
+
+@font-face {
+    font-family: "SF-Pro-Display-Bold";
+    src: url('./fonts/SF-Pro-Display-Bold.otf') format('otf');
+}
+
+p {
+    font-family: 'SF-Pro-Display-Regular', sans-serif;
+    
+}
+div {
+    font-family: 'SF-Pro-Display-Regular', sans-serif;
+}
+
+.auth-title {
+    font-family: 'SF-Pro-Display-Bold', sans-serif;
+    text-align: center;
+    font-size: 3rem;
+    font-weight: bold;
+    margin-bottom: 0.2rem;
+}
+.auth-sub {
+    font-family: 'SF-Pro-Display-Regular', sans-serif;
+    text-align: center;
+    color: #B0B0B0;
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+}
+
+
 .stButton > button {
     width: 100%;
     height: 40px;
