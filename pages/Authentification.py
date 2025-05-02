@@ -16,22 +16,7 @@ Visual.initial()
 def show_auth():
     st.markdown("""
     <style>
-    /* Background chung */
-    .block-container {
-    }
     /* Tiêu đề */
-    .auth-title {
-        text-align: center;
-        font-size: 3rem;
-        font-weight: bold;
-        margin-bottom: 0.2rem;
-    }
-    .auth-sub {
-        text-align: center;
-        color: #B0B0B0;
-        font-size: 1.2rem;
-        margin-bottom: 2rem;
-    }
     
     </style>
     """, unsafe_allow_html=True)
