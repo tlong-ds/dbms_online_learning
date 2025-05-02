@@ -2,6 +2,9 @@ import streamlit as st
 from style.ui import Visual
 import toml
 import os
+from dotenv import load_dotenv
+import pymysql
+from services.api.db.auth import verify_user, hash_password
 
 
 # Settings for Appearance
@@ -25,13 +28,103 @@ def save_mode():
     except Exception as e:
         st.error(f"Failed to change mode: {str(e)}")
 
-# Setting for Appearance
+
+def update_user_info(username, role, name, email, extra):
+    conn = connect_db()
+    cursor = conn.cursor()
+    if role == "Learner":
+        cursor.execute("""
+            UPDATE Learners SET LearnerName = %s, Email = %s, PhoneNumber = %s WHERE AccountName = %s
+        """, (name, email, extra, username))
+        st.session_state.name = name
+        st.session_state.email = email
+        st.session_state.phone = extra
+    elif role == "Instructor":
+        cursor.execute("""
+            UPDATE Instructors SET InstructorName = %s, Email = %s, Expertise = %s WHERE AccountName = %s
+        """, (name, email, extra, username))
+        st.session_state.name = name
+        st.session_state.email = email
+        st.session_state.phone = extra
+    conn.commit()
+    conn.close()
+
+# Setting for Personal Information
 def info():
-    pass
+    st.header("Account Settings")
+    with st.form("info_form"):
+        name = st.text_input(
+            "Full name", 
+            value=st.session_state.name, 
+            key="info_name"
+        )
+        email = st.text_input(
+            "Email address", 
+            value=st.session_state.email, 
+            key="info_email"
+        )
+
+        if st.session_state.role == "Learner":
+            extra_label = "Phone number"
+            extra_value = st.text_input(
+                extra_label, 
+                value=st.session_state.phone, 
+                key="info_extra"
+            )
+        elif st.session_state.role == "Instructor":
+            extra_label = "Expertise"
+            extra_value = st.text_input(
+                extra_label, 
+                value=st.session_state.expertise, 
+                key="info_extra"
+            )
+        submitted = st.form_submit_button("Save")
+
+    if submitted:
+        update_user_info(
+            username=st.session_state.username,
+            role=st.session_state.role,
+            name=name,
+            email=email,
+            extra=extra_value
+        )
+        st.success("Profile updated successfully!")
+
+    
 
 # Setting for Security
 def security():
-    pass
+    st.header("Change Password")
+
+    with st.form("pwd_form"):
+        cp = st.text_input("Current Password", type="password", key="current_password")
+        npw = st.text_input("New Password",     type="password", key="new_password")
+        cf = st.text_input("Confirm New Password", type="password", key="confirm_password")
+        submitted = st.form_submit_button("Change Password")
+
+    if submitted:
+        if verify_user(st.session_state.username, cp, st.session_state.role):
+            if npw == cf:
+                conn = connect_db()
+                cursor = conn.cursor()
+                if st.session_state.role == "Learner":
+                    cursor.execute(
+                        "UPDATE Learners SET Password = %s WHERE AccountName = %s",
+                        (hash_password(npw), st.session_state.username)
+                    )
+                else:
+                    cursor.execute(
+                        "UPDATE Instructors SET Password = %s WHERE AccountName = %s",
+                        (hash_password(npw), st.session_state.username)
+                    )
+                conn.commit()
+                conn.close()
+                st.success("Password changed successfully")
+            else:
+                st.error("New password and confirm password do not match.")
+        else:
+            st.error("Current password is incorrect.")
+
 
 # Setting for About
 def about():
@@ -51,4 +144,3 @@ def about():
                 
     - Tran Anh Tuan                             
     ''', unsafe_allow_html=True)
-    
