@@ -4,8 +4,6 @@ from style.ui import Visual
 import os
 import toml
 
-if "login" not in st.session_state:
-    st.session_state["login"] = None
 Visual.initial()
 
 def main():

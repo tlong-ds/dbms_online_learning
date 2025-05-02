@@ -22,6 +22,8 @@ class Visual:
     def custom_sidebar(cls, css = None):
         if not css:
             cls.initial()
+        if "login" not in st.session_state:
+            st.session_state.login = False
         components.html("""
         <script>
             const theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
