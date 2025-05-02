@@ -1,6 +1,8 @@
 import streamlit as st
 from style.ui import Visual
 import toml
+import os
+
 
 # Settings for Appearance
 def appearance():
@@ -18,8 +20,8 @@ def save_mode():
             Visual.CONFIG["theme"]["base"] = selected_mode
             with open('.streamlit/config.toml', 'w') as f:
                 toml.dump(Visual.CONFIG, f)
-            st.rerun()
             st.success(f"Change mode successfully!")
+            st.rerun()
     except Exception as e:
         st.error(f"Failed to change mode: {str(e)}")
 
@@ -33,4 +35,20 @@ def security():
 
 # Setting for About
 def about():
-    pass
+    st.header("The Learning House")
+    st.markdown("<p>The Best Learning Platform for Learners and Instructors!</p>", unsafe_allow_html=True)
+    st.markdown('''<b>Our Missions</b>: Empowering education through open-source innovation
+    ''', unsafe_allow_html=True)
+    st.markdown('''<b>Meet Our Specialists</b>:                           
+    ''', unsafe_allow_html=True)
+    st.markdown('''
+                
+    - Doan Quoc Bao
+                
+    - Ly Thanh Long
+                
+    - Ha Quang Minh
+                
+    - Tran Anh Tuan                             
+    ''', unsafe_allow_html=True)
+    
