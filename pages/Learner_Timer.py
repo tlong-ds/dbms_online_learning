@@ -4,7 +4,7 @@ import time
 import os
 
 st.set_page_config(
-    page_title="Timer",
+    page_title="Focus Timer",
     page_icon="⏱️",
     layout="wide",
     initial_sidebar_state="collapsed",
@@ -125,7 +125,7 @@ def timer_init():
             st.rerun()
 
 def show_timer():
-    st.header("Timer")
+    st.header("Focus Timer")
     st.markdown("<div style='font-size: 17px;'>The best timer for ultra-focusing!</div>", unsafe_allow_html=True)
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
