@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
+/* Import Font */
 
 @font-face {
     font-family: "SF-Pro-Display-Regular";
@@ -10,12 +10,33 @@
     src: url('./fonts/SF-Pro-Display-Bold.otf') format('otf');
 }
 
+/* Font Customization */
+
 p {
     font-family: 'SF-Pro-Display-Regular', sans-serif;
     
 }
 div {
     font-family: 'SF-Pro-Display-Regular', sans-serif;
+}
+h1 {
+    font-family: 'SF-Pro-Display-Bold', sans-serif;
+    font-weight: bold;
+}
+
+h2 {
+    font-family: 'SF-Pro-Display-Bold', sans-serif;
+    font-weight: bold;
+}
+
+h3 {
+    font-family: 'SF-Pro-Display-Bold', sans-serif;
+    font-weight: bold;
+}
+
+h4 {
+    font-family: 'SF-Pro-Display-Bold', sans-serif;
+    font-weight: bold;
 }
 
 .auth-title {
@@ -33,6 +54,7 @@ div {
     margin-bottom: 2rem;
 }
 
+/* Button Customization */
 
 .stButton > button {
     width: 100%;
@@ -44,6 +66,8 @@ div {
     font-size: 16px;
     border-radius: 5px;
 }
+
+/* Sidebar Customization */
 
 /* Hide default sidebar navigation */
 [data-testid="stSidebarNav"] {display: none !important;}
