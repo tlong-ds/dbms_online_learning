@@ -62,6 +62,7 @@ def load_music():
             st.audio(sound_bytes, format="audio/mp3", autoplay=True)
 
 def timer_init():
+    st.session_state.session = 1
     m, s = st.columns(2)
     with m:
         st.markdown("<div style='text-align:center;'>min</div>", unsafe_allow_html=True)
