@@ -13,3 +13,4 @@ python-dotenv
 fpdf
 mysql-connector-python
 streamlit_extras
+altair
