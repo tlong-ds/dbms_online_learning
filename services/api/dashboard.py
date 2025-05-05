@@ -66,7 +66,7 @@ def show_dashboard_learner():
     )
     passed = cursor.fetchone()[0]
 
-    st.title("Learning Dashboard")
+    st.title("Learning Statistics")
     st.markdown(f"Hello **{learner_name}**—here’s your progress overview.")
 
     c1, c2, c3, c4 = st.columns(4)

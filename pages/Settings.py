@@ -19,7 +19,7 @@ if "view" not in st.session_state:
 def show_settings():
     col1, col2 = st.columns([1, 4])
     with col1:
-        st.header("Settings")
+        st.title("Settings")
         if st.button("Personal Information"):
             st.session_state.view = "info"
         if st.button("Security"):

@@ -54,10 +54,10 @@ class Visual:
                 st.divider()
                 # Learner Navigation
                 if st.session_state.role == "Learner":
-                    if st.button("Dashboard"):
-                        switch_page("Learner Dashboard")
                     if st.button("Courses"):
                         switch_page("Learner Courses") 
+                    if st.button("Statistics"):
+                        switch_page("Learner Statistics")
                     if st.button("Notebook"):
                         switch_page("Learner Notebook")
                     if st.button("Focus Timer"):

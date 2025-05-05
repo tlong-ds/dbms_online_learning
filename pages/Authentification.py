@@ -14,15 +14,7 @@ st.set_page_config(
 Visual.initial()
 
 def show_auth():
-    st.markdown("""
-    <style>
-    /* Tiêu đề */
     
-    </style>
-    """, unsafe_allow_html=True)
-
-
-
     # --- Header ---
     st.markdown('<div class="auth-title">The Learning House</div>', unsafe_allow_html=True)
     st.markdown('<div class="auth-sub">The Best Learning Platform for Learners and Instructors!</div>', unsafe_allow_html=True)
@@ -45,7 +37,7 @@ def show_auth():
                         st.success(f"Welcome back, {username}!")
                         st.session_state.login = True
                         get_user_info(username, role)
-                        switch_page(f"{role}_Dashboard")
+                        switch_page(f"{role}_Courses")
                         
                     else:
                         st.error("Wrong username or password.")
@@ -86,7 +78,6 @@ def show_auth():
 
 
     st.markdown("---")
-    st.caption("© Tuấn đẹp trai nhất thế giới")
     
 
 show_auth()

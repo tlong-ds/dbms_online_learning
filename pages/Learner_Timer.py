@@ -20,7 +20,7 @@ st.session_state.setdefault("break_time", 0)
 st.session_state.setdefault("session", 1)
 
 def show_timer():
-    st.header("Focus Timer")
+    st.title("Focus Timer")
     st.markdown("<div style='font-size: 17px;'>The best timer for ultra-focusing!</div>", unsafe_allow_html=True)
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
