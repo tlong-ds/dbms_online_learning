@@ -11,7 +11,6 @@ MYSQL_HOST = os.getenv("MYSQL_HOST")
 MYSQL_DB = os.getenv("MYSQL_DB")
 MYSQL_PORT = int(os.getenv("MYSQL_PORT"))
 
-@st.cache_resource
 def connect_db():
     return pymysql.connect(
         host=MYSQL_HOST,
