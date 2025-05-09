@@ -1,0 +1,143 @@
+import streamlit as st
+from services.api.db.auth import load_cookies
+from urllib.parse import urlencode
+import toml
+import os
+from dotenv import load_dotenv
+import pymysql
+import pandas as pd
+from datetime import datetime
+
+load_dotenv()
+MYSQL_USER = os.getenv("MYSQL_USER")
+MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD")
+MYSQL_HOST = os.getenv("MYSQL_HOST")
+MYSQL_DB = os.getenv("MYSQL_DB")
+MYSQL_PORT = int(os.getenv("MYSQL_PORT"))
+
+def connect_db():
+    if "id" not in st.session_state:
+        load_cookies()
+    return pymysql.connect(
+        host=MYSQL_HOST,
+        user=MYSQL_USER,
+        password=MYSQL_PASSWORD,
+        database=MYSQL_DB,
+        port=MYSQL_PORT
+    )
+
+def get_courses():
+    conn = connect_db()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            SELECT 
+                c.CourseID,
+                c.CourseName,
+                i.InstructorID,
+                i.InstructorName,
+                avg(cs.rating) as avg_rating
+            FROM courses c
+            LEFT JOIN instructors i ON c.InstructorID = i.InstructorID
+            LEFT JOIN coursestatuses cs ON c.CourseID = cs.CourseID
+            GROUP BY CourseID;
+        """,)
+        data = cursor.fetchall()
+        columns = ["CourseID", "Course Name", "Instructor ID", "Instructor Name", "Average Rating"] 
+        df = pd.DataFrame(data, columns = columns)
+        return df.fillna({"Average Rating": 0.0})
+    except Exception as e:
+        st.error(f"Error fetching notebooks: {str(e)}")
+        return pd.DataFrame() 
+    finally:
+        cursor.close()
+        conn.close()
+
+def get_enrollment_date(course_id, learner_id=st.session_state.id):
+    conn = connect_db()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            SELECT
+                EnrollmentDate
+            FROM enrollments
+            WHERE LearnerID=%s AND CourseID=%s;
+        """, (learner_id, course_id))
+        data = cursor.fetchone()
+        return data[0] if data else None
+    except Exception as e:
+        st.error(str(e))
+
+def enroll(course_id, learner_id=st.session_state.id, enroll_date=datetime.today()):
+    conn = connect_db()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            INSERT INTO Enrollments (EnrollmentDate, LearnerID, CourseID)
+            VALUES (
+                %s,
+                %s,
+                %s
+            )
+        """, (enroll_date, learner_id, course_id))
+        conn.commit()
+        st.success("Successfully enrolled")
+        st.rerun()
+        return True
+    except Exception as e:
+        conn.rollback()
+        st.error(f"Error when enrolling: {str(e)}")
+        return False
+    finally:
+        cursor.close()
+        conn.close()
+def courses_card(df):
+    cols = st.columns(4)
+    for i in range(4):
+        params = {
+            "course_id": df.loc[i, "CourseID"],
+            "course_name": df.loc[i, "Course Name"],
+            "instructor_id": df.loc[i, "Instructor ID"],
+            "instructor_name": df.loc[i, "Instructor Name"],
+            "average_rating": df.loc[i, 'Average Rating'] if 'Average Rating' in df.columns and not pd.isna(df.loc[i, 'Average Rating']) else 0,
+        }
+
+        href = f"./Course_Preview?{urlencode(params)}"
+        cols[i].markdown(f"""
+        <div class="card-container">
+            <a href={href} class="card">
+                <img src="https://i.imgur.com/O3GVLty.jpeg" alt="Course Image">
+                <div class="card-body">
+                    <div class="card-university">{params["instructor_name"]}</div>
+                    <div class="card-title">{params["course_name"]}</div>
+                    <div class="card-footer" style="text-align: right;">{round(params["average_rating"],1)} ⭐️</div>
+                </div>
+            </a>
+        </div>
+        """, unsafe_allow_html=True)
+def courses_list(df):
+    view = df.fillna({"Average Rating": 0.0})
+    view["Course Link"] = view.apply(
+        lambda row: f"./Course_Preview?"
+                    f"course_id={row['CourseID']}&"
+                    f"course_name={row['Course Name']}&"
+                    f"instructor_id={row['Instructor ID']}&"
+                    f"instructor_name={row['Instructor Name']}&"
+                    f"average_rating={row['Average Rating']}", axis=1)
+
+    view = view[["Course Link", "Instructor Name", "Average Rating"]]
+
+    st.data_editor(
+        view,
+        use_container_width=True,
+        column_config={
+            "Course Link": st.column_config.LinkColumn(
+                label="Course Name",
+                help="Click to view course details",
+                display_text=r"course_name=([^&]+)"
+            )
+        },
+        disabled=["widgets"]
+    )
+
+    

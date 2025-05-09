@@ -1,14 +1,14 @@
 import streamlit as st
 from style.ui import Visual
 from services.api.timer import learn_countdown, break_countdown, timer_init
-
+from services.api.db.auth import load_cookies
 st.set_page_config(
     page_title="Focus Timer",
     page_icon="⏱️",
     layout="wide",
     initial_sidebar_state="collapsed",
 )
-
+load_cookies()
 Visual.initial()
 st.session_state.setdefault("timer_state", None)
 st.session_state.setdefault("timer_name", "Default Timer")

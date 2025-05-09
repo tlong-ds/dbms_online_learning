@@ -1,4 +1,3 @@
-streamlit==1.38.0
 bcrypt
 pandas
 numpy
@@ -12,5 +11,7 @@ streamlit.extras
 python-dotenv
 fpdf
 mysql-connector-python
+streamlit==1.38.0
 streamlit_extras
+streamlit-cookies-manager
 altair

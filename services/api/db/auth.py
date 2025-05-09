@@ -3,6 +3,12 @@ import os
 from dotenv import load_dotenv
 import bcrypt
 import streamlit as st
+from streamlit_cookies_manager import EncryptedCookieManager
+
+
+cookies = EncryptedCookieManager(prefix="auth_", password=os.getenv("COOKIE_SECRET", "default_secret_key"))
+if not cookies.ready():
+    st.stop()
 
 load_dotenv()
 MYSQL_USER = os.getenv("MYSQL_USER")
@@ -11,7 +17,6 @@ MYSQL_HOST = os.getenv("MYSQL_HOST")
 MYSQL_DB = os.getenv("MYSQL_DB")
 MYSQL_PORT = int(os.getenv("MYSQL_PORT"))
 
-@st.cache_resource
 def connect_db():
     return pymysql.connect(
         host=MYSQL_HOST,
@@ -89,6 +94,9 @@ def verify_user(username, password, role):
         data = cursor.fetchone()
         conn.close()
         if data and check_password(password, data[0]):
+            cookies["username"] = username
+            cookies["role"] = role
+            cookies.save()
             return True
         return False
     elif role == "Instructor":
@@ -96,29 +104,43 @@ def verify_user(username, password, role):
         data = cursor.fetchone()
         conn.close()
         if data and check_password(password, data[0]):
+            cookies["username"] = username
+            cookies["role"] = role
+            cookies.save()
             return True
         return False
+    
+def load_cookies():
+    if "username" not in st.session_state and cookies.get("username"):
+        username = cookies.get("username")
+        role = cookies.get("role")
+        get_user_info(username, role)
+        st.session_state.login = True
+        st.rerun()
     
 def get_user_info(username, role):
     conn = connect_db()
     cursor = conn.cursor()
     if role == "Learner":
-        cursor.execute("SELECT LearnerName, Email, PhoneNumber FROM Learners WHERE AccountName = %s", (username,))
+        cursor.execute("SELECT LearnerID, LearnerName, Email, PhoneNumber FROM Learners WHERE AccountName = %s", (username,))
         data = cursor.fetchone()
+        
         st.session_state.username = username
         st.session_state.role = role
-        st.session_state.name = data[0]
-        st.session_state.email = data[1]
-        st.session_state.phone = data[2]
+        st.session_state.id = data[0]
+        st.session_state.name = data[1]
+        st.session_state.email = data[2]
+        st.session_state.phone = data[3]
         conn.close()
     elif role == "Instructor":
-        cursor.execute("SELECT InstructorName, Email, Expertise FROM Instructors WHERE AccountName = %s", (username,))
+        cursor.execute("SELECT InstructorID, InstructorName, Email, Expertise FROM Instructors WHERE AccountName = %s", (username,))
         data = cursor.fetchone()
         st.session_state.username = username
         st.session_state.role = role
-        st.session_state.name = data[0]
-        st.session_state.email = data[1]
-        st.session_state.expertise = data[2]
+        st.session_state.id = data[0]
+        st.session_state.name = data[1]
+        st.session_state.email = data[2]
+        st.session_state.expertise = data[3]
         conn.close()
 
 def update_user_info(username, role, name, email, extra):
@@ -163,3 +185,10 @@ def update_password(username, old_password, role, new_password, confirmed_new_pa
             st.error("New password and confirm password do not match.")
     else:
         st.error("Current password is incorrect.")
+
+def logout_user():
+    cookies["username"] = ""
+    cookies["role"] = ""
+    cookies.save()
+    st.session_state.clear()
+    
