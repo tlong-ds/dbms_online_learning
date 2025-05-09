@@ -1,6 +1,7 @@
 import streamlit as st
 from style.ui import Visual
 from services.api.notebook import get_notebooks, notebook_list, create, edit
+
 st.set_page_config(
     page_title="Notebooks",
     page_icon="📔",

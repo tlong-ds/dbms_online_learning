@@ -1,10 +1,12 @@
 import streamlit as st
+from services.api.db.auth import load_cookies
 import markdown2
 import pandas as pd
 from datetime import datetime
 import pymysql
 from dotenv import load_dotenv
 import os
+
 
 load_dotenv()
 MYSQL_USER = os.getenv("MYSQL_USER")
@@ -13,7 +15,17 @@ MYSQL_HOST = os.getenv("MYSQL_HOST")
 MYSQL_DB = os.getenv("MYSQL_DB")
 MYSQL_PORT = int(os.getenv("MYSQL_PORT"))
 
+st.session_state.setdefault("note_title", None)
+st.session_state.setdefault("note_date_created", None)
+st.session_state.setdefault("note_course_id", None)
+st.session_state.setdefault("note_course", None)
+st.session_state.setdefault("note_lecture_id", None)
+st.session_state.setdefault("note_lecture", None)
+st.session_state.setdefault("note_content", None)
+
 def connect_db():
+    if "id" not in st.session_state:
+        load_cookies()
     return pymysql.connect(
         host=MYSQL_HOST,
         user=MYSQL_USER,
@@ -92,8 +104,6 @@ def notebook_list(df):
             st.rerun()
     except Exception as e:
         st.error(str(e))
-
-
 
 def create(notebook_name, learner_id=st.session_state.id, course_id = None, lecture_id = None):
     conn = connect_db()

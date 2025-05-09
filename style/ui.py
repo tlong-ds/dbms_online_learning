@@ -3,7 +3,7 @@ import streamlit.components.v1 as components
 from streamlit_extras.switch_page_button import switch_page
 import os
 import toml
-
+from services.api.db.auth import logout_user
 
 
 class Visual:
@@ -76,13 +76,8 @@ class Visual:
                 st.divider()
                 
                 if st.button("Log out"):
-                    st.session_state.login = False
-                    st.session_state.role = None
-                    st.session_state.name = None
-                    st.session_state.email = None
-                    st.session_state.phone = None
-                    switch_page("Authentification")
-                    
+                    logout_user()
+                    switch_page("main")
             else:
                 st.markdown('<div style="text-align: center;">Please login to continue!</div>', unsafe_allow_html=True)
     

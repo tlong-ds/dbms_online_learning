@@ -3,6 +3,12 @@ import os
 from dotenv import load_dotenv
 import bcrypt
 import streamlit as st
+from streamlit_cookies_manager import EncryptedCookieManager
+
+
+cookies = EncryptedCookieManager(prefix="auth_", password=os.getenv("COOKIE_SECRET", "default_secret_key"))
+if not cookies.ready():
+    st.stop()
 
 load_dotenv()
 MYSQL_USER = os.getenv("MYSQL_USER")
@@ -88,6 +94,9 @@ def verify_user(username, password, role):
         data = cursor.fetchone()
         conn.close()
         if data and check_password(password, data[0]):
+            cookies["username"] = username
+            cookies["role"] = role
+            cookies.save()
             return True
         return False
     elif role == "Instructor":
@@ -95,8 +104,19 @@ def verify_user(username, password, role):
         data = cursor.fetchone()
         conn.close()
         if data and check_password(password, data[0]):
+            cookies["username"] = username
+            cookies["role"] = role
+            cookies.save()
             return True
         return False
+    
+def load_cookies():
+    if "username" not in st.session_state and cookies.get("username"):
+        username = cookies.get("username")
+        role = cookies.get("role")
+        get_user_info(username, role)
+        st.session_state.login = True
+        st.rerun()
     
 def get_user_info(username, role):
     conn = connect_db()
@@ -165,3 +185,10 @@ def update_password(username, old_password, role, new_password, confirmed_new_pa
             st.error("New password and confirm password do not match.")
     else:
         st.error("Current password is incorrect.")
+
+def logout_user():
+    cookies["username"] = ""
+    cookies["role"] = ""
+    cookies.save()
+    st.session_state.clear()
+    

@@ -1,6 +1,7 @@
 import streamlit as st
 from style.ui import Visual
 from services.api.settings import info, security, appearance, about
+from services.api.db.auth import load_cookies
 import toml
 import os
 
@@ -11,6 +12,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
+load_cookies()
 Visual.initial()
 
 if "view" not in st.session_state:

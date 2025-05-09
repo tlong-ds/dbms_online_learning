@@ -104,3 +104,18 @@ CREATE TABLE Notebooks (
     FOREIGN KEY (CourseID) REFERENCES Courses(CourseID),
     FOREIGN KEY (LectureID) REFERENCES Lectures(LectureID)
 );
+use onlinelearning;
+
+select 
+	c.CourseID,
+    c.CourseName,
+    i.InstructorID,
+    i.InstructorName,
+    avg(cs.rating) as avg_rating
+from courses c
+left join instructors i on c.InstructorID = i.InstructorID
+left join coursestatuses cs on c.CourseID = cs.CourseID
+group by CourseID;
+
+
+
