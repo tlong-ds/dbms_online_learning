@@ -1,13 +1,10 @@
 USE OnlineLearning;
-DROP TABLE IF EXISTS Learners;
-DROP TABLE IF EXISTS Instructors;
-DROP TABLE IF EXISTS Courses;
+
 DROP TABLE IF EXISTS Lectures;
 DROP TABLE IF EXISTS Enrollments;
-DROP TABLE IF EXISTS LectureResults;
-DROP TABLE IF EXISTS CourseStatuses;
-DROP TABLE IF EXISTS Notebooks;
-DROP TABLE IF EXISTS Quizzes;
+DROP TABLE IF EXISTS Courses;
+DROP TABLE IF EXISTS Learners;
+DROP TABLE IF EXISTS Instructors;
 
 -- 1. Learners
 CREATE TABLE Learners (
@@ -91,16 +88,3 @@ CREATE TABLE CourseStatuses (
   FOREIGN KEY (CourseID)  REFERENCES Courses(CourseID)
 );
 
--- 8. Notebooks
-CREATE TABLE Notebooks (
-	NotebookID INT		AUTO_INCREMENT PRIMARY KEY,
-    LearnerID INT		NOT NULL,
-    CourseID INT,	
-    LectureID INT,
-    NotebookName VARCHAR(100) UNIQUE,
-    Content VARCHAR(1000),
-    CreatedDate DATE,
-	FOREIGN KEY (LearnerID) REFERENCES Learners(LearnerID),
-    FOREIGN KEY (CourseID) REFERENCES Courses(CourseID),
-    FOREIGN KEY (LectureID) REFERENCES Lectures(LectureID)
-);

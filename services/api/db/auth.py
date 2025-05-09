@@ -11,6 +11,7 @@ MYSQL_HOST = os.getenv("MYSQL_HOST")
 MYSQL_DB = os.getenv("MYSQL_DB")
 MYSQL_PORT = int(os.getenv("MYSQL_PORT"))
 
+@st.cache_resource
 def connect_db():
     return pymysql.connect(
         host=MYSQL_HOST,
@@ -102,25 +103,22 @@ def get_user_info(username, role):
     conn = connect_db()
     cursor = conn.cursor()
     if role == "Learner":
-        cursor.execute("SELECT LearnerID, LearnerName, Email, PhoneNumber FROM Learners WHERE AccountName = %s", (username,))
+        cursor.execute("SELECT LearnerName, Email, PhoneNumber FROM Learners WHERE AccountName = %s", (username,))
         data = cursor.fetchone()
-        
         st.session_state.username = username
         st.session_state.role = role
-        st.session_state.id = data[0]
-        st.session_state.name = data[1]
-        st.session_state.email = data[2]
-        st.session_state.phone = data[3]
+        st.session_state.name = data[0]
+        st.session_state.email = data[1]
+        st.session_state.phone = data[2]
         conn.close()
     elif role == "Instructor":
-        cursor.execute("SELECT InstructorID, InstructorName, Email, Expertise FROM Instructors WHERE AccountName = %s", (username,))
+        cursor.execute("SELECT InstructorName, Email, Expertise FROM Instructors WHERE AccountName = %s", (username,))
         data = cursor.fetchone()
         st.session_state.username = username
         st.session_state.role = role
-        st.session_state.id = data[0]
-        st.session_state.name = data[1]
-        st.session_state.email = data[2]
-        st.session_state.expertise = data[3]
+        st.session_state.name = data[0]
+        st.session_state.email = data[1]
+        st.session_state.expertise = data[2]
         conn.close()
 
 def update_user_info(username, role, name, email, extra):
