@@ -36,7 +36,7 @@ def get_courses():
                 c.CourseName,
                 i.InstructorID,
                 i.InstructorName,
-                avg(cs.rating) as avg_rating
+                round(avg(cs.rating), 0) as avg_rating
             FROM courses c
             LEFT JOIN instructors i ON c.InstructorID = i.InstructorID
             LEFT JOIN coursestatuses cs ON c.CourseID = cs.CourseID
@@ -140,4 +140,46 @@ def courses_list(df):
         disabled=["widgets"]
     )
 
-    
+def get_courses_overview():
+    """
+    Lấy danh sách khóa học + giảng viên + số người đăng kí + rating TB.
+    Trả về DataFrame có cột 'Total Learners'.
+    """
+    conn = connect_db()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            SELECT
+                c.CourseID,
+                c.CourseName,
+                i.InstructorID,
+                i.InstructorName,
+                IFNULL(enr.TotalLearners, 0) AS total_learners,
+                IFNULL(AVG(cs.Rating), 0)    AS avg_rating
+            FROM  Courses            AS c
+            LEFT JOIN Instructors    AS i   ON i.InstructorID = c.InstructorID
+
+            /* Đếm người đăng kí */
+            LEFT JOIN (
+                SELECT  CourseID,
+                        COUNT(*) AS TotalLearners
+                FROM    Enrollments
+                GROUP BY CourseID
+            ) AS enr ON enr.CourseID = c.CourseID
+
+            /* Rating trung bình */
+            LEFT JOIN CourseStatuses AS cs ON cs.CourseID = c.CourseID
+            GROUP BY c.CourseID;
+        """)
+        data = cursor.fetchall()
+        cols = ["CourseID", "Course Name",
+                "Instructor ID", "Instructor Name",
+                "Total Learners", "Average Rating"]
+        df = pd.DataFrame(data, columns=cols)
+        return df.fillna({"Average Rating": 0.0, "Total Learners": 0})
+    except Exception as e:
+        st.error(f"Error fetching courses: {e}")
+        return pd.DataFrame()
+    finally:
+        cursor.close()
+        conn.close()
