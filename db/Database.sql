@@ -116,6 +116,3 @@ from courses c
 left join instructors i on c.InstructorID = i.InstructorID
 left join coursestatuses cs on c.CourseID = cs.CourseID
 group by CourseID;
-
-
-

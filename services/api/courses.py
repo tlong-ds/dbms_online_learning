@@ -26,8 +26,12 @@ def connect_db():
         port=MYSQL_PORT
     )
 
+import pandas as pd
+import streamlit as st
+from services.api.courses import connect_db
+
 def get_courses():
-    conn = connect_db()
+    conn   = connect_db()
     cursor = conn.cursor()
     try:
         cursor.execute("""
@@ -36,22 +40,48 @@ def get_courses():
                 c.CourseName,
                 i.InstructorID,
                 i.InstructorName,
-                round(avg(cs.rating), 0) as avg_rating
+                ROUND(AVG(cs.rating), 0) AS avg_rating,
+                COUNT(e.CourseID)        AS EnrolledCount
             FROM courses c
-            LEFT JOIN instructors i ON c.InstructorID = i.InstructorID
-            LEFT JOIN coursestatuses cs ON c.CourseID = cs.CourseID
-            GROUP BY CourseID;
-        """,)
-        data = cursor.fetchall()
-        columns = ["CourseID", "Course Name", "Instructor ID", "Instructor Name", "Average Rating"] 
-        df = pd.DataFrame(data, columns = columns)
+            LEFT JOIN instructors i 
+              ON c.InstructorID = i.InstructorID
+            LEFT JOIN coursestatuses cs 
+              ON c.CourseID = cs.CourseID
+            LEFT JOIN enrollments e 
+              ON c.CourseID = e.CourseID
+            GROUP BY 
+                c.CourseID,
+                c.CourseName,
+                i.InstructorID,
+                i.InstructorName;
+        """)
+        rows = cursor.fetchall()
+        columns = [
+            "CourseID",
+            "Course Name",
+            "Instructor ID",
+            "Instructor Name",
+            "Average Rating",
+            "EnrolledCount",
+        ]
+        df = pd.DataFrame(rows, columns=columns)
         return df.fillna({"Average Rating": 0.0})
-    except Exception as e:
-        st.error(f"Error fetching notebooks: {str(e)}")
-        return pd.DataFrame() 
     finally:
         cursor.close()
         conn.close()
+
+def get_course_description(course_id: int) -> str:
+    conn  = connect_db()
+    cur   = conn.cursor()
+    cur.execute(
+        "SELECT Descriptions FROM Courses WHERE CourseID = %s",
+        (course_id,)
+    )
+    desc = cur.fetchone()
+    cur.close()
+    conn.close()
+    return desc[0] if desc and desc[0] else ""
+
 
 def get_enrollment_date(course_id, learner_id=st.session_state.id):
     conn = connect_db()
@@ -129,6 +159,7 @@ def courses_list(df):
 
     st.data_editor(
         view,
+        hide_index=True,
         use_container_width=True,
         column_config={
             "Course Link": st.column_config.LinkColumn(
@@ -183,3 +214,49 @@ def get_courses_overview():
     finally:
         cursor.close()
         conn.close()
+
+def get_total_learners(course_id: int) -> int:
+    conn = connect_db()
+    cur = conn.cursor()
+    cur.execute(
+        "SELECT COUNT(*) FROM Enrollments WHERE CourseID = %s",
+        (course_id,)
+    )
+    count = cur.fetchone()[0]
+    cur.close()
+    conn.close()
+    return count
+
+def get_lectures(course_id: int):
+    conn = connect_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT LectureID, Title
+        FROM Lectures
+        WHERE CourseID = %s
+        ORDER BY CreatedAt
+    """, (course_id,))
+    rows = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return [{"id": r[0], "title": r[1]} for r in rows]
+
+def get_user_courses():
+    """
+    Trả về danh sách courses mà user hiện tại đã enroll,
+    mỗi phần tử dạng {"id": int, "name": str}.
+    """
+    user_id = get_current_user_id()
+    conn = connect_db()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT c.CourseID, c.Name
+        FROM Courses c
+        JOIN Enrollments e ON e.CourseID = c.CourseID
+        WHERE e.UserID = %s
+        ORDER BY c.Name
+    """, (user_id,))
+    rows = cur.fetchall()
+    cur.close()
+    conn.close()
+    return [{"id": r[0], "name": r[1]} for r in rows]

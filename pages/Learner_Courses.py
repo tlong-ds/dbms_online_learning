@@ -2,7 +2,7 @@ import re
 import streamlit as st
 from urllib.parse import urlencode
 from style.ui import Visual
-from services.api.courses import get_courses, courses_list
+from services.api.courses import get_courses, courses_list, get_total_learners
 from services.api.db.auth import load_cookies
 import pandas as pd
 
@@ -65,8 +65,9 @@ def sort_df(df: pd.DataFrame) -> pd.DataFrame:
 # ════════════════  RENDER CARDS  ════════════════
 def render_cards(df_subset: pd.DataFrame, cards_per_row: int):
     for start in range(0, len(df_subset), cards_per_row):
-        cols = st.columns(cards_per_row)
-        slice_df = df_subset.iloc[start:start + cards_per_row]
+        cols     = st.columns(cards_per_row)
+        slice_df = df_subset.iloc[start : start + cards_per_row]
+
         for col, (_, row) in zip(cols, slice_df.iterrows()):
             href = "./Course_Preview?" + urlencode({
                 "course_id":       row["CourseID"],
@@ -75,20 +76,25 @@ def render_cards(df_subset: pd.DataFrame, cards_per_row: int):
                 "instructor_name": row["Instructor Name"],
                 "average_rating":  round(row["Average Rating"] or 0, 1),
             })
-            col.markdown(
-f"""
-<a href="{href}" style="text-decoration:none">
-  <img src="https://i.imgur.com/O3GVLty.jpeg"
-       style="width:100%;border-radius:8px 8px 0 0">
-  <div style="padding:0.5rem">
-      <div style="font-size:0.8rem;color:#777">{row['Instructor Name']}</div>
-      <div style="font-weight:600">{row['Course Name']}</div>
-      <div style="text-align:right">{round(row['Average Rating'] or 0,1)} ⭐️</div>
+
+            # 1 lần gọi markdown, 1 cặp <a>…</a> duy nhất
+            html = f"""
+<a href="{href}" style="text-decoration:none; display:block; border:1px solid #eee; border-radius:8px; overflow:hidden;">
+  <div style="padding:0.5rem;">
+    <div style="font-size:1.4rem; font-weight:600; margin:0;">
+      {row['Course Name']}
+    </div>
+    <div style="font-size:0.9rem; color:#555; margin:0.25rem 0;">
+      {row['Instructor Name']}
+    </div>
+    <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.9rem;">
+      <span>{row['EnrolledCount']} enrolled</span>
+      <span>{round(row['Average Rating'] or 0,1)} ⭐️</span>
+    </div>
   </div>
 </a>
-""",
-                unsafe_allow_html=True,
-            )
+"""
+            col.markdown(html, unsafe_allow_html=True)
 
 # ════════════════  TRANG CHÍNH  ════════════════
 def show_courses():
