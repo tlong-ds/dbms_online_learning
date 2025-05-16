@@ -17,3 +17,4 @@ streamlit-cookies-manager
 streamlit-searchbox
 altair
 boto3
+awscli
