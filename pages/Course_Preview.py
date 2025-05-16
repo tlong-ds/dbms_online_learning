@@ -25,7 +25,7 @@ course_desc     = params.get("description", "")
 
 
 # --- HEADER ---
-cols = st.columns([1, 6, 3])
+cols = st.columns([1, 6, 1])
 with cols[0]:
     st.image("D:/Minh/Tài liệu học tập (DSEB)/Kì 4/Database Management Systems/Final Project/dbms_online_learning/logo/logo_course.webp", width=120)
 with cols[1]:
@@ -62,7 +62,7 @@ if course_desc:
 lectures = get_lectures(course_id)
 
 # --- HIỂN THỊ LECTURES ---
-st.markdown(f"## Lectures — {len(lectures)} lecture{'s' if len(lectures)>1 else ''}")
+st.markdown(f"## Specialization - {len(lectures)} lecture{'s' if len(lectures)>1 else ''}")
 for lec in lectures:
     link = "/Lecture_Preview?" + urlencode({"lecture_id": lec["id"]})
     st.markdown(f"- [{lec['title']}]({link})")
