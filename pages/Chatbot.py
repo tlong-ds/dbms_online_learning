@@ -4,7 +4,7 @@ from services.api.db.auth import load_cookies
 import toml
 import os
 from services.api.chatbot.core import get_chat_response
-
+from services.api.chatbot.retrieval import sync_courses_to_qdrant
 st.set_page_config(
     page_title="Chat bot",
     layout="wide",
@@ -13,6 +13,10 @@ st.set_page_config(
 
 load_cookies()
 Visual.initial()
+
+if st.button("Reload vectordb"):
+    sync_courses_to_qdrant()
+
 
 st.markdown(
     """
