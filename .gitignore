@@ -3,4 +3,6 @@ __pycache__/
 **/**/__pycache__/
 **/**/**/__pycache__/
 .streamlit/config.toml
-.streamlit/secr
+.streamlit/secrets.toml
+.DS_Store
+.env
