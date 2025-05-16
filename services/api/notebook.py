@@ -1,6 +1,5 @@
 import streamlit as st
 from services.api.db.auth import load_cookies
-import markdown2
 import pandas as pd
 from datetime import datetime
 import pymysql
