@@ -102,14 +102,10 @@ def enroll(course_id, learner_id=st.session_state.id, enroll_date=datetime.today
     conn = connect_db()
     cursor = conn.cursor()
     try:
-        cursor.execute("""
-            INSERT INTO Enrollments (EnrollmentDate, LearnerID, CourseID)
-            VALUES (
-                %s,
-                %s,
-                %s
-            )
-        """, (enroll_date, learner_id, course_id))
+        cursor.execute(
+    "CALL sp_EnrollLearner(%s, %s, %s)",
+    (learner_id, course_id, enroll_date)
+)
         conn.commit()
         st.success("Successfully enrolled")
         st.rerun()
@@ -121,6 +117,7 @@ def enroll(course_id, learner_id=st.session_state.id, enroll_date=datetime.today
     finally:
         cursor.close()
         conn.close()
+        
 def courses_card(df):
     cols = st.columns(4)
     for i in range(4):

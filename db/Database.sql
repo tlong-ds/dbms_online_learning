@@ -38,9 +38,29 @@ CREATE TABLE Courses (
   CourseID     INT            AUTO_INCREMENT PRIMARY KEY,
   CourseName   VARCHAR(100)   NOT NULL,
   Descriptions TEXT,
+  Difficulty TEXT,
+  Skills ,
+  Durations 
   InstructorID INT,
   CreatedAt    TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP,
   UpdatedAt    TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (InstructorID) REFERENCES Instructors(InstructorID)
+);
+
+-- 3. Courses
+CREATE TABLE Courses (
+  CourseID        INT                             AUTO_INCREMENT PRIMARY KEY,
+  CourseName      VARCHAR(100)                    NOT NULL,
+  Descriptions    TEXT,
+  Skills          TEXT                            NOT NULL,
+  EstimatedDuration INT                           NOT NULL COMMENT 'giờ',
+  Difficulty      ENUM('Beginner','Intermediate','Advanced','Expert')
+                                        NOT NULL DEFAULT 'Beginner',
+  AverageRating   DECIMAL(3,2)                    NOT NULL DEFAULT 0.00,
+  InstructorID    INT,
+  CreatedAt       TIMESTAMP                       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UpdatedAt       TIMESTAMP                       NOT NULL DEFAULT CURRENT_TIMESTAMP 
+                                                  ON UPDATE CURRENT_TIMESTAMP,
   FOREIGN KEY (InstructorID) REFERENCES Instructors(InstructorID)
 );
 
