@@ -39,7 +39,7 @@ for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-user_input = st.chat_input("Nhập tin nhắn của bạn...")
+user_input = st.chat_input("What you want to learn...")
 
 if user_input:
     st.session_state.messages.append({"role": "user", "content": user_input})
