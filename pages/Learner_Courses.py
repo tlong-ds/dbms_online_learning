@@ -80,6 +80,30 @@ def sort_df(df: pd.DataFrame) -> pd.DataFrame:
 def render_cards(df_subset: pd.DataFrame, cards_per_row: int):
     for start in range(0, len(df_subset), cards_per_row):
         cols = st.columns(cards_per_row)
+        slice_df = df_subset.iloc[start:start + cards_per_row]
+        for col, (_, row) in zip(cols, slice_df.iterrows()):
+            href = "./Course_Preview?" + urlencode({
+                "course_id":       row["CourseID"],
+                "course_name":     row["Course Name"],
+                "instructor_id":   row["Instructor ID"],
+                "instructor_name": row["Instructor Name"],
+                "average_rating":  round(row["Average Rating"] or 0, 1),
+            })
+            col.markdown(
+f"""
+<div class="card-container">
+    <a href={href} class="card">
+        <img src="https://i.imgur.com/O3GVLty.jpeg" alt="Course Image">
+        <div class="card-body">
+            <div style="font-size:0.8rem;color:#777">{row['Instructor Name']}</div>
+            <div style="font-weight:600">{row['Course Name']}</div>
+            <div style="text-align:right">{round(row['Average Rating'] or 0,1)} ⭐️</div>
+        </div>
+    </a>
+</div>
+""",
+                unsafe_allow_html=True,
+            )
         for col, (_, row) in zip(cols, df_subset.iloc[start:start+cards_per_row].iterrows()):
             cid = int(row['CourseID'])
             rev_cnt, avg_rat = rating_map.get(cid, (0, 0.0))
