@@ -50,112 +50,19 @@ BEGIN
 
   -- 3) chèn enroll với ngày truyền vào
   INSERT INTO Enrollments (EnrollmentDate, LearnerID, CourseID, Percentage, Rating)
-  VALUES (pEnrollDate, pLearnerID, pCourseID, 0, NULL);
+  VALUES (pEnrollDate, pLearnerID, pCourseID, 0, 0);
 
   COMMIT;
 END$$
 
 
-/****************************************************************
-  2. sp_AddLectureResult
-     – Ghi hoặc cập nhật điểm LectureResults
-     – Tự động tính lại % hoàn thành trong CourseStatuses
-****************************************************************/
-DELIMITER $$
-
-DROP PROCEDURE IF EXISTS sp_AddLectureResult$$
-CREATE PROCEDURE sp_AddLectureResult
-(
-    IN pLearnerID INT,
-    IN pCourseID  INT,
-    IN pLectureID INT,
-    IN pScore     INT,
-    IN pState 	  VARCHAR(50)
-)
-BEGIN
-    /* ---- KHAI BÁO BIẾN CỤC BỘ: phải nằm sát đầu BEGIN ---- */
-    DECLARE vTotalLect  INT DEFAULT 0;
-    DECLARE vDoneLect   INT DEFAULT 0;
-    DECLARE vNewPct     INT DEFAULT 0;
-    DECLARE vState      VARCHAR(50); 
-
-    /* ---- VALIDATE ĐẦU VÀO ---- */
-    IF pScore < 0 OR pScore > 100 THEN
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Score must be between 0 and 100';
-    END IF;
-
-    SET vState = CASE
-                    WHEN pScore > 70 THEN 'passed'
-                    ELSE 'unpassed'
-                 END;
-
-    IF pState NOT IN ('unpassed','passed') THEN
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Invalid progress state';
-    END IF;
-    
-    IF NOT EXISTS ( SELECT 1
-                    FROM Lectures
-                    WHERE LectureID = pLectureID
-                      AND CourseID  = pCourseID) THEN
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Lecture does not belong to the provided course';
-    END IF;
-
-    /* ---- GIAO DỊCH ---- */
-    START TRANSACTION;
-
-        /* 1. Ghi / cập nhật điểm bài giảng */
-        INSERT INTO LectureResults
-                (LearnerID, CourseID, LectureID, Score, ResultDate, State)
-        VALUES  (pLearnerID, pCourseID, pLectureID, pScore, CURRENT_DATE(), vState)
-        ON DUPLICATE KEY UPDATE
-                Score      = VALUES(Score),
-                State      = VALUES(State),
-                ResultDate = VALUES(ResultDate);
-
-        /* 2. Tính lại % tiến độ */
-        SELECT COUNT(*) INTO vTotalLect
-        FROM   Lectures
-        WHERE  CourseID = pCourseID;
-
-        SELECT COUNT(*) INTO vDoneLect
-        FROM   LectureResults
-        WHERE  LearnerID = pLearnerID
-          AND  CourseID  = pCourseID
-          AND  State     = 'completed';
-
-        IF vTotalLect = 0 THEN
-            SET vNewPct = 0;
-        ELSE
-            SET vNewPct = ROUND(vDoneLect * 100 / vTotalLect);
-        END IF;
-
-        UPDATE CourseStatuses
-        SET    Percentage = vNewPct
-        WHERE  LearnerID  = pLearnerID
-          AND  CourseID   = pCourseID;
-
-    COMMIT;
-END$$
-
-SELECT * FROM Learners WHERE LearnerID = 10;
-CALL sp_EnrollLearner(10, 3);
-
-select * from enrollments;
-select * from courses;
-
-
-
-
-
-
 
 -- 2. Ghi điểm bài giảng
 drop procedure if exists sp_update_lecture_result;
-DELIMITER $$
 
+drop procedure if exists sp_AddLectureResult;
+
+DELIMITER $$
 CREATE PROCEDURE sp_update_lecture_result (
   IN p_learner_id INT,
   IN p_course_id INT,
@@ -252,5 +159,5 @@ END$$
 DELIMITER ;
 
 select * from enrollments;
-CALL sp_RateCourse(13, 25, 3);
+CALL sp_RateCourse(15, 37, 5);
 select * from courses;

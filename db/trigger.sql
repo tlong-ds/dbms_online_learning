@@ -24,13 +24,14 @@ select * from enrollments;
 select * from courses;
 select * from lectures where CourseID = 16;
 
+drop trigger if exists trg_courses_after_update_rating;
 DELIMITER $$
-
 CREATE TRIGGER trg_courses_after_update_rating
 AFTER UPDATE ON Enrollments
 FOR EACH ROW
 BEGIN
-  IF OLD.Rating <> NEW.Rating THEN
+  -- Chạy khi Rating thực sự thay đổi (kể cả NULL ↔ giá trị)
+  IF NOT (OLD.Rating <=> NEW.Rating) THEN
     UPDATE Courses
     SET AverageRating = (
       SELECT ROUND(AVG(Rating), 2)
@@ -41,5 +42,4 @@ BEGIN
     WHERE CourseID = NEW.CourseID;
   END IF;
 END$$
-
 DELIMITER ;
