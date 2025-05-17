@@ -22,7 +22,7 @@ def show_auth():
 
     # --- role & action ---
     st.write("Select your role.")
-    role   = st.selectbox(label = "Who are you?", options = ["Learner", "Instructor"], label_visibility="collapsed")
+    role   = st.selectbox(label = "Who are you?", options = ["Learner", "Instructor"], index = 0, label_visibility="collapsed")
     action = st.radio(label = "action", options = ["Login", "Sign Up"], label_visibility="collapsed", horizontal=True)
 
     # --- center the form ---
