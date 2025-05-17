@@ -51,15 +51,11 @@ def get_courses():
                 c.CourseName,
                 i.InstructorID,
                 i.InstructorName,
-                ROUND(AVG(cs.rating), 0) AS avg_rating,
-                COUNT(e.CourseID)        AS EnrolledCount
+                avg(e.Rating)      AS avg_rating,
+                COUNT(e.CourseID)  AS EnrolledCount
             FROM courses c
-            LEFT JOIN instructors i 
-              ON c.InstructorID = i.InstructorID
-            LEFT JOIN coursestatuses cs 
-              ON c.CourseID = cs.CourseID
-            LEFT JOIN enrollments e 
-              ON c.CourseID = e.CourseID
+            LEFT JOIN instructors i ON c.InstructorID = i.InstructorID
+            LEFT JOIN enrollments  e ON c.CourseID     = e.CourseID
             GROUP BY 
                 c.CourseID,
                 c.CourseName,
@@ -195,9 +191,10 @@ def get_courses_overview():
                 i.InstructorID,
                 i.InstructorName,
                 IFNULL(enr.TotalLearners, 0) AS total_learners,
-                IFNULL(AVG(cs.Rating), 0)    AS avg_rating
+                IFNULL(AVG(e.Rating), 0)    AS avg_rating
             FROM  Courses            AS c
             LEFT JOIN Instructors    AS i   ON i.InstructorID = c.InstructorID
+            LEFT JOIN Enrollments    AS e   ON e.CourseID = c.CourseID
 
             /* Đếm người đăng kí */
             LEFT JOIN (
@@ -206,10 +203,6 @@ def get_courses_overview():
                 FROM    Enrollments
                 GROUP BY CourseID
             ) AS enr ON enr.CourseID = c.CourseID
-
-            /* Rating trung bình */
-            LEFT JOIN CourseStatuses AS cs ON cs.CourseID = c.CourseID
-            GROUP BY c.CourseID;
         """)
         data = cursor.fetchall()
         cols = ["CourseID", "Course Name",
@@ -238,7 +231,7 @@ def get_instructed_courses(instructor_id=st.session_state.id):
             COALESCE(AVG(cs.Rating), 0) AS avg_rating
         FROM Courses c
         LEFT JOIN Instructors i ON c.InstructorID = i.InstructorID
-        LEFT JOIN CourseStatuses cs ON c.CourseID = cs.CourseID
+        LEFT JOIN Enrollments enr ON c.CourseID = enr.CourseID
         LEFT JOIN (
             SELECT  
                 CourseID,
@@ -411,4 +404,5 @@ def get_user_courses(user_id=st.session_state.id):
     cur.close()
     conn.close()
     return [{"id": r[0], "name": r[1]} for r in rows]
+
 
