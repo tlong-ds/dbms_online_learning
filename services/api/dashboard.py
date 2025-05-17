@@ -55,7 +55,7 @@ def show_dashboard_learner():
     cursor.execute("SELECT COUNT(*) FROM Enrollments WHERE LearnerID = %s", (learner_id,))
     enrolled = cursor.fetchone()[0]
     cursor.execute(
-        "SELECT COUNT(*) FROM CourseStatuses WHERE LearnerID = %s AND Percentage = 100",
+        "SELECT COUNT(*) FROM Enrollments WHERE LearnerID = %s AND Percentage = 100",
         (learner_id,)
     )
     completed = cursor.fetchone()[0]

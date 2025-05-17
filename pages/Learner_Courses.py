@@ -1,4 +1,5 @@
 import re
+import math
 import streamlit as st
 from urllib.parse import urlencode
 from style.ui import Visual
@@ -30,7 +31,7 @@ if course_ids:
     placeholders = ','.join(['%s'] * len(course_ids))
     query = (
         f"SELECT CourseID, COUNT(*), COALESCE(AVG(Rating),0) "
-        f"FROM CourseStatuses WHERE CourseID IN ({placeholders}) GROUP BY CourseID"
+        f"FROM Enrollments WHERE CourseID IN ({placeholders}) GROUP BY CourseID"
     )
     cur.execute(query, tuple(course_ids))
     for cid, rev_cnt, avg_rat in cur.fetchall():
@@ -45,8 +46,11 @@ def make_key(label: str) -> str:
 # ══════════════════  CÀI ĐẶT  ══════════════════
 ROWS_PER_CLICK    = 5
 CARDS_PER_ROW_MAP = {"xl": 4, "lg": 6, "md": 8}
-VIEW_LABEL2KEY = {"Extra large icons":"xl","Large icons":"lg","Medium icons":"md","List":"list"}
-VIEW_KEY2LABEL = {v:k for k,v in VIEW_LABEL2KEY.items()}
+VIEW_LABEL2KEY    = {"Extra large icons":"xl", "Large icons":"lg", "Medium icons":"md", "List":"list"}
+VIEW_KEY2LABEL    = {v:k for k,v in VIEW_LABEL2KEY.items()}
+
+# --- thêm hằng số default ---
+DEFAULT_VIEW_KEY = "md"
 
 SORT_OPTIONS = {
     "Name (A → Z)": ("Course Name", True),
@@ -60,7 +64,7 @@ KEY2LABEL_SORT   = {make_key(k):k for k in SORT_OPTIONS}
 DEFAULT_SORT_KEY = make_key("Name (A → Z)")
 
 # Session state
-st.session_state.setdefault("view", "md")
+st.session_state.setdefault("view", DEFAULT_VIEW_KEY)
 st.session_state.setdefault("rows", 1)
 st.session_state.setdefault("sort_key", DEFAULT_SORT_KEY)
 
@@ -76,7 +80,6 @@ def sort_df(df: pd.DataFrame) -> pd.DataFrame:
         return df.sort_values(col, ascending=asc, kind="mergesort")
     return df
 
-# Render cards dùng rating_map, không query lặp lại
 def render_cards(df_subset: pd.DataFrame, cards_per_row: int):
     for start in range(0, len(df_subset), cards_per_row):
         cols = st.columns(cards_per_row)
@@ -93,11 +96,29 @@ def render_cards(df_subset: pd.DataFrame, cards_per_row: int):
                 })
             )
             html = f"""
-<a href="{href}" style="text-decoration:none; display:block; border:1px solid #eee; border-radius:8px; overflow:hidden; margin-bottom:1rem;">
+<a href="{href}"
+   style="text-decoration:none;
+          display:block;
+          border:1px solid #eee;
+          border-radius:8px;
+          overflow:hidden;
+          margin-bottom:1rem;
+          background-color: #f2f2f2;">
   <div style="padding:0.5rem;">
-    <div style="font-size:1.4rem; font-weight:600; margin:0;">{row['Course Name']}</div>
-    <div style="font-size:0.9rem; color:#555; margin:0.25rem 0;">{row['Instructor Name']}</div>
-    <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.9rem;">
+    <div style="font-size:1.4rem;
+                font-weight:600;
+                margin:0;">
+      {row['Course Name']}
+    </div>
+    <div style="font-size:0.9rem;
+                color: #888888;      /* màu xám cho Instructor */
+                margin:0.25rem 0;">
+      {row['Instructor Name']}
+    </div>
+    <div style="display:flex;
+                justify-content:space-between;
+                align-items:center;
+                font-size:0.9rem;">
       <span>{row['EnrolledCount']} enrolled</span>
       <span>{avg_rat:.1f} ⭐️</span>
     </div>
@@ -109,22 +130,32 @@ def render_cards(df_subset: pd.DataFrame, cards_per_row: int):
 # Main
 def show_courses():
     st.title("Courses")
-    # Sort và view controls
-    header_cols = st.columns(CARDS_PER_ROW_MAP.get(st.session_state.view,8))
-    # Sort select
+    cards_per_row = CARDS_PER_ROW_MAP.get(st.session_state.view, CARDS_PER_ROW_MAP[DEFAULT_VIEW_KEY])
+    # tạo một list weight có cards_per_row-2 phần tử bỏ trống, rồi 2 phần tử cho sort/view
+    weights = [1] * (cards_per_row - 2) + [2, 2]
+    header_cols = st.columns(weights, gap="small")
+
+    # --- phần Sort bỏ nguyên ---
     with header_cols[-2]:
-        sort_labels = list(SORT_OPTIONS.keys())
+        sort_labels   = list(SORT_OPTIONS.keys())
         current_label = KEY2LABEL_SORT[st.session_state.sort_key]
-        new_label = st.selectbox("Sort by", sort_labels, index=sort_labels.index(current_label))
-        new_key = make_key(new_label)
+        new_label     = st.selectbox("Sort by", sort_labels, index=sort_labels.index(current_label))
+        new_key       = make_key(new_label)
         if new_key != st.session_state.sort_key:
             st.session_state.sort_key = new_key
             st.rerun()
-    # View select
+
+    # --- phần View đã sửa ---
     with header_cols[-1]:
         view_labels = list(VIEW_LABEL2KEY.keys())
-        cur_view_label = VIEW_KEY2LABEL[st.session_state.view]
-        new_view = st.selectbox("View", view_labels, index=view_labels.index(cur_view_label))
+        # lấy nhãn hiện tại, nếu không có thì về nhãn mặc định
+        cur_view_label = VIEW_KEY2LABEL.get(
+            st.session_state.view,
+            VIEW_KEY2LABEL[DEFAULT_VIEW_KEY]
+        )
+        # tìm index an toàn
+        default_idx = view_labels.index(cur_view_label) if cur_view_label in view_labels else 0
+        new_view = st.selectbox("View", view_labels, index=default_idx)
         key_view = VIEW_LABEL2KEY[new_view]
         if key_view != st.session_state.view:
             st.session_state.view = key_view

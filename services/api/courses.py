@@ -40,15 +40,11 @@ def get_courses():
                 c.CourseName,
                 i.InstructorID,
                 i.InstructorName,
-                ROUND(AVG(cs.rating), 0) AS avg_rating,
-                COUNT(e.CourseID)        AS EnrolledCount
+                avg(e.Rating)      AS avg_rating,
+                COUNT(e.CourseID)  AS EnrolledCount
             FROM courses c
-            LEFT JOIN instructors i 
-              ON c.InstructorID = i.InstructorID
-            LEFT JOIN coursestatuses cs 
-              ON c.CourseID = cs.CourseID
-            LEFT JOIN enrollments e 
-              ON c.CourseID = e.CourseID
+            LEFT JOIN instructors i ON c.InstructorID = i.InstructorID
+            LEFT JOIN enrollments  e ON c.CourseID     = e.CourseID
             GROUP BY 
                 c.CourseID,
                 c.CourseName,
@@ -183,9 +179,10 @@ def get_courses_overview():
                 i.InstructorID,
                 i.InstructorName,
                 IFNULL(enr.TotalLearners, 0) AS total_learners,
-                IFNULL(AVG(cs.Rating), 0)    AS avg_rating
+                IFNULL(AVG(e.Rating), 0)    AS avg_rating
             FROM  Courses            AS c
             LEFT JOIN Instructors    AS i   ON i.InstructorID = c.InstructorID
+            LEFT JOIN Enrollments    AS e   ON e.CourseID = c.CourseID
 
             /* Đếm người đăng kí */
             LEFT JOIN (
@@ -194,10 +191,6 @@ def get_courses_overview():
                 FROM    Enrollments
                 GROUP BY CourseID
             ) AS enr ON enr.CourseID = c.CourseID
-
-            /* Rating trung bình */
-            LEFT JOIN CourseStatuses AS cs ON cs.CourseID = c.CourseID
-            GROUP BY c.CourseID;
         """)
         data = cursor.fetchall()
         cols = ["CourseID", "Course Name",
@@ -237,23 +230,3 @@ def get_lectures(course_id: int):
     cursor.close()
     conn.close()
     return [{"id": r[0], "title": r[1]} for r in rows]
-
-def get_user_courses():
-    """
-    Trả về danh sách courses mà user hiện tại đã enroll,
-    mỗi phần tử dạng {"id": int, "name": str}.
-    """
-    user_id = get_current_user_id()
-    conn = connect_db()
-    cur = conn.cursor()
-    cur.execute("""
-        SELECT c.CourseID, c.Name
-        FROM Courses c
-        JOIN Enrollments e ON e.CourseID = c.CourseID
-        WHERE e.UserID = %s
-        ORDER BY c.Name
-    """, (user_id,))
-    rows = cur.fetchall()
-    cur.close()
-    conn.close()
-    return [{"id": r[0], "name": r[1]} for r in rows]
