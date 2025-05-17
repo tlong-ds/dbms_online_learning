@@ -77,15 +77,16 @@ def render_cards(df_subset: pd.DataFrame, cards_per_row: int):
             })
             col.markdown(
 f"""
-<a href="{href}" style="text-decoration:none">
-  <img src="https://i.imgur.com/O3GVLty.jpeg"
-       style="width:100%;border-radius:8px 8px 0 0">
-  <div style="padding:0.5rem">
-      <div style="font-size:0.8rem;color:#777">{row['Instructor Name']}</div>
-      <div style="font-weight:600">{row['Course Name']}</div>
-      <div style="text-align:right">{round(row['Average Rating'] or 0,1)} ⭐️</div>
-  </div>
-</a>
+<div class="card-container">
+    <a href={href} class="card">
+        <img src="https://i.imgur.com/O3GVLty.jpeg" alt="Course Image">
+        <div class="card-body">
+            <div style="font-size:0.8rem;color:#777">{row['Instructor Name']}</div>
+            <div style="font-weight:600">{row['Course Name']}</div>
+            <div style="text-align:right">{round(row['Average Rating'] or 0,1)} ⭐️</div>
+        </div>
+    </a>
+</div>
 """,
                 unsafe_allow_html=True,
             )

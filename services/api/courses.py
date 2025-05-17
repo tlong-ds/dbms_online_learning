@@ -7,6 +7,9 @@ from dotenv import load_dotenv
 import pymysql
 import pandas as pd
 from datetime import datetime
+import boto3
+from botocore.exceptions import ClientError
+import tempfile
 
 load_dotenv()
 MYSQL_USER = os.getenv("MYSQL_USER")
@@ -14,6 +17,15 @@ MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD")
 MYSQL_HOST = os.getenv("MYSQL_HOST")
 MYSQL_DB = os.getenv("MYSQL_DB")
 MYSQL_PORT = int(os.getenv("MYSQL_PORT"))
+
+AWS_ACCESS_KEY=os.getenv("AWS_ACCESS_KEY_ID")
+AWS_SECRET_KEY=os.getenv("AWS_SECRET_ACCESS_KEY")
+REGION=os.getenv("REGION_NAME")
+s3 = boto3.client('s3',
+    aws_access_key_id=AWS_ACCESS_KEY,
+    aws_secret_access_key=AWS_SECRET_KEY,
+    region_name=REGION
+    )
 
 def connect_db():
     if "id" not in st.session_state:
@@ -26,6 +38,8 @@ def connect_db():
         port=MYSQL_PORT
     )
 
+
+# ═══════════════ FUNCTIONS FOR LEARNERS ════════════════
 def get_courses():
     conn = connect_db()
     cursor = conn.cursor()
@@ -91,30 +105,7 @@ def enroll(course_id, learner_id=st.session_state.id, enroll_date=datetime.today
     finally:
         cursor.close()
         conn.close()
-def courses_card(df):
-    cols = st.columns(4)
-    for i in range(4):
-        params = {
-            "course_id": df.loc[i, "CourseID"],
-            "course_name": df.loc[i, "Course Name"],
-            "instructor_id": df.loc[i, "Instructor ID"],
-            "instructor_name": df.loc[i, "Instructor Name"],
-            "average_rating": df.loc[i, 'Average Rating'] if 'Average Rating' in df.columns and not pd.isna(df.loc[i, 'Average Rating']) else 0,
-        }
 
-        href = f"./Course_Preview?{urlencode(params)}"
-        cols[i].markdown(f"""
-        <div class="card-container">
-            <a href={href} class="card">
-                <img src="https://i.imgur.com/O3GVLty.jpeg" alt="Course Image">
-                <div class="card-body">
-                    <div class="card-university">{params["instructor_name"]}</div>
-                    <div class="card-title">{params["course_name"]}</div>
-                    <div class="card-footer" style="text-align: right;">{round(params["average_rating"],1)} ⭐️</div>
-                </div>
-            </a>
-        </div>
-        """, unsafe_allow_html=True)
 def courses_list(df):
     view = df.fillna({"Average Rating": 0.0})
     view["Course Link"] = view.apply(
@@ -183,3 +174,144 @@ def get_courses_overview():
     finally:
         cursor.close()
         conn.close()
+
+# ═══════════════ FUNCTIONS FOR INSTRUCTORS ════════════════
+def get_instructed_courses(instructor_id=st.session_state.id):
+    conn = connect_db()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+        SELECT 
+            c.CourseID,
+            c.CourseName, 
+            COALESCE(enr.TotalLearners, 0) AS TotalLearners,
+            COALESCE(AVG(cs.Rating), 0) AS avg_rating
+        FROM Courses c
+        LEFT JOIN Instructors i ON c.InstructorID = i.InstructorID
+        LEFT JOIN CourseStatuses cs ON c.CourseID = cs.CourseID
+        LEFT JOIN (
+            SELECT  
+                CourseID,
+                COUNT(*) AS TotalLearners
+            FROM Enrollments
+            GROUP BY CourseID
+        ) AS enr ON enr.CourseID = c.CourseID
+        WHERE c.InstructorID = %s
+        GROUP BY CourseID;
+        """, (instructor_id))
+        data = cursor.fetchall()
+        columns = ["CourseID", "Course Name", "Total Learners", "Average Rating"] 
+        df = pd.DataFrame(data, columns = columns)
+        return df.fillna({"Average Rating": 0.0})
+    except Exception as e:
+        st.error(f"Error fetching courses: {e}")
+        return pd.DataFrame()
+    finally:
+        cursor.close()
+        conn.close()
+
+def instructed_courses_list(df):
+    view = df.fillna({"Average Rating": 0.0})
+    view["Course Link"] = view.apply(
+        lambda row: f"./Course_Preview?"
+                    f"course_id={row['CourseID']}&"
+                    f"course_name={row['Course Name']}&",
+        axis = 1
+    )
+    view = view[["Course Link", "Total Learners", "Average Rating"]]
+    st.data_editor(
+        view,
+        hide_index=True,
+        use_container_width=True,
+        column_config={
+            "Course Link": st.column_config.LinkColumn(
+                label="Course Name",
+                help="Click to view course details",
+                display_text=r"course_name=([^&]+)"
+            )
+        },
+        disabled=["widgets", "Course Link"]
+    )
+
+def learner_list(course_id, instructor_id = st.session_state.id):
+    conn = connect_db()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+        SELECT 
+            enr.LearnerID,
+            l.LearnerName
+        from Enrollments enr 
+        LEFT JOIN Learners l ON enr.LearnerID = l.LearnerID
+        LEFT JOIN Courses c ON enr.CourseID = c.CourseID
+        WHERE enr.CourseID = %s AND c.InstructorID = %s
+        """, (course_id, instructor_id))
+        data = cursor.fetchall()
+        columns = ["LearnerID", "Learner Name"] 
+        df = pd.DataFrame(data, columns = columns)
+        return df
+    except Exception as e:
+        st.error(f"Error fetching learners: {e}")
+        return pd.DataFrame()
+    finally:
+        cursor.close()
+        conn.close()
+
+def lecture_list(course_id):
+    conn = connect_db()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+        SELECT
+            LectureID,
+            CourseID,            
+            Title,
+            Content
+        from Lectures 
+        WHERE CourseID = %s
+        """, (course_id))
+        data = cursor.fetchall()
+        columns = ["LectureID", "CourseID", "Lecture Title", "Content"] 
+        df = pd.DataFrame(data, columns = columns)
+        return df
+    except Exception as e:
+        st.error(f"Error fetching learners: {e}")
+        return pd.DataFrame()
+    finally:
+        cursor.close()
+        conn.close()
+
+def upload_lecture_media(course_id, lecture_id, media_file, bucket_name="tlhmaterials"):
+    media_path = f"videos/cid{course_id}/lid{lecture_id}/{media_file.name}"
+    with st.spinner("Uploading to S3..."):
+        upload_video_to_s3(media_file, bucket_name, media_path)
+    url = get_video_stream_url(bucket_name, media_path)
+    st.success("Upload successful!")
+    st.write("Preview uploaded video!")
+    st.video(url)
+
+# ═══════════════ BOTO3 FUNCTIONALITIES ════════════════
+def file_exists(bucket_name, s3_key):
+    try:
+        s3.head_object(Bucket=bucket_name, Key=s3_key)
+        return True
+    except ClientError as e:
+        if e.response["Error"]["Code"] == '404':
+            return False
+        else:
+            raise
+def get_video_stream_url(bucket_name, s3_key, region=REGION):
+    return f"https://{bucket_name}.s3-{region}.amazonaws.com/{s3_key}"
+
+def upload_video_to_s3(uploaded_file, bucket_name, s3_key):
+    s3.put_object(
+        Bucket=bucket_name,
+        Key=s3_key,
+        Body=uploaded_file.read(),
+        ContentType="video/mp4",        # allows browser streaming
+        ACL="public-read",              # public access if needed
+        ContentDisposition="inline"     # forces browser to render instead of download
+    )
+    
+def add_lecture():
+    pass
