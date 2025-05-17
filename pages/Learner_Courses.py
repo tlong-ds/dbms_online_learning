@@ -92,21 +92,7 @@ def render_cards(df_subset: pd.DataFrame, cards_per_row: int):
                 "instructor_name": row["Instructor Name"],
                 "average_rating":  round(row["Average Rating"] or 0, 1),
             })
-            col.markdown(
-f"""
-<div class="card-container">
-    <a href={href} class="card">
-        <img src="https://i.imgur.com/O3GVLty.jpeg" alt="Course Image">
-        <div class="card-body">
-            <div style="font-size:0.8rem;color:#777">{row['Instructor Name']}</div>
-            <div style="font-weight:600">{row['Course Name']}</div>
-            <div style="text-align:right">{round(row['Average Rating'] or 0,1)} ⭐️</div>
-        </div>
-    </a>
-</div>
-""",
-                unsafe_allow_html=True,
-            )
+            
         for col, (_, row) in zip(cols, df_subset.iloc[start:start+cards_per_row].iterrows()):
             cid = int(row['CourseID'])
             rev_cnt, avg_rat = rating_map.get(cid, (0, 0.0))
@@ -120,35 +106,35 @@ f"""
                 })
             )
             html = f"""
-<a href="{href}"
-   style="text-decoration:none;
-          display:block;
-          border:1px solid #eee;
-          border-radius:8px;
-          overflow:hidden;
-          margin-bottom:1rem;
-          background-color: #f2f2f2;">
-  <div style="padding:0.5rem;">
-    <div style="font-size:1.4rem;
-                font-weight:600;
-                margin:0;">
-      {row['Course Name']}
-    </div>
-    <div style="font-size:0.9rem;
-                color: #888888;      /* màu xám cho Instructor */
-                margin:0.25rem 0;">
-      {row['Instructor Name']}
-    </div>
-    <div style="display:flex;
-                justify-content:space-between;
-                align-items:center;
-                font-size:0.9rem;">
-      <span>{row['EnrolledCount']} enrolled</span>
-      <span>{avg_rat:.1f} ⭐️</span>
-    </div>
-  </div>
-</a>
-"""
+                <a href="{href}"
+                style="text-decoration:none;
+                        display:block;
+                        border:1px solid #eee;
+                        border-radius:8px;
+                        overflow:hidden;
+                        margin-bottom:1rem;
+                        background-color: #f2f2f2;">
+                <div style="padding:0.5rem;">
+                    <div style="font-size:1.4rem;
+                                font-weight:600;
+                                margin:0;">
+                    {row['Course Name']}
+                    </div>
+                    <div style="font-size:0.9rem;
+                                color: #888888;      /* màu xám cho Instructor */
+                                margin:0.25rem 0;">
+                    {row['Instructor Name']}
+                    </div>
+                    <div style="display:flex;
+                                justify-content:space-between;
+                                align-items:center;
+                                font-size:0.9rem;">
+                    <span>{row['EnrolledCount']} enrolled</span>
+                    <span>{avg_rat:.1f} ⭐️</span>
+                    </div>
+                </div>
+                </a>
+            """
             col.markdown(html, unsafe_allow_html=True)
 
 # Main
@@ -194,7 +180,8 @@ def show_courses():
     limit = st.session_state.rows * CARDS_PER_ROW_MAP.get(st.session_state.view,8)
     render_cards(df.head(limit), CARDS_PER_ROW_MAP.get(st.session_state.view,8))
     if limit < len(df):
-        if st.button("Expand"):
+        expands = st.columns([20, 2])
+        if expands[1].button("Expand"):
             st.session_state.rows += ROWS_PER_CLICK
             st.rerun()
 
