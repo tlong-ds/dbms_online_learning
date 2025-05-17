@@ -365,7 +365,8 @@ def upload_video_to_s3(uploaded_file, bucket_name, s3_key):
     
 def add_lecture():
     pass
-=======
+
+
 def get_total_learners(course_id: int) -> int:
     conn = connect_db()
     cur = conn.cursor()
@@ -392,12 +393,11 @@ def get_lectures(course_id: int):
     conn.close()
     return [{"id": r[0], "title": r[1]} for r in rows]
 
-def get_user_courses():
+def get_user_courses(user_id=st.session_state.id):
     """
     Trả về danh sách courses mà user hiện tại đã enroll,
     mỗi phần tử dạng {"id": int, "name": str}.
     """
-    user_id = get_current_user_id()
     conn = connect_db()
     cur = conn.cursor()
     cur.execute("""
