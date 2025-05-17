@@ -117,6 +117,8 @@ def load_cookies():
         get_user_info(username, role)
         st.session_state.login = True
         st.rerun()
+
+        
     
 def get_user_info(username, role):
     conn = connect_db()

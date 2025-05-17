@@ -14,9 +14,6 @@ mysql-connector-python
 streamlit==1.38.0
 streamlit_extras
 streamlit-cookies-manager
-altair
-
-#chatbot's dependencies
 tqdm
 google-generativeai
 streamlit
@@ -30,3 +27,7 @@ lark-parser
 qdrant_client
 lark
 langchain_huggingface
+streamlit-searchbox
+altair
+boto3
+awscli
