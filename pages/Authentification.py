@@ -3,6 +3,7 @@ from style.ui import Visual
 import os
 from services.api.db.auth import register_user, verify_user, get_user_info
 from streamlit_extras.switch_page_button import switch_page
+import re
 
 st.set_page_config(
     page_title="Login",
@@ -44,23 +45,36 @@ def show_auth():
 
             else:  # Sign Up
                 st.subheader("Create Account")
-                
+
                 full_name = st.text_input("Full Name", placeholder="Enter your full name")
                 username  = st.text_input("Username", key="f_new_user", placeholder="Choose a username")
                 email     = st.text_input("Email", key="f_email", placeholder="Enter your email")
                 password  = st.text_input("Password", type="password", key="f_new_pass", placeholder="Choose a password")
                 confirm   = st.text_input("Confirm Password", type="password", key="f_new_pass_confirm", placeholder="Confirm password")
-                # different info of roles
+
                 if role == "Learner":
                     phone = st.text_input("Phone Number", key="f_phone", placeholder="Enter your phone number")
-                else:  # Instructor
+                else:
                     expertise = st.text_input("Expertise", key="f_expertise", placeholder="Enter your expertise area")
+
                 ok = st.form_submit_button("Sign Up")
                 if ok:
-                    if not all([full_name, username, email, password, confirm, phone if role == "Learner" else expertise]):
+                    required_fields = [full_name, username, email, password, confirm]
+                    if role == "Learner":
+                        required_fields.append(phone)
+                    else:
+                        required_fields.append(expertise)
+
+                    if not all(required_fields):
                         st.warning("Please fill in all required fields.")
+                    elif len(password) < 8:
+                        st.warning("Password must be at least 8 characters long.")
+                    elif not re.match(r"^[\w\.-]+@[\w\.-]+\.\w+$", email):
+                        st.warning("Please enter a valid email address (e.g., example@gmail.com).")
                     elif password != confirm:
                         st.error("Passwords do not match.")
+                    elif len(phone) < 9:
+                        st.error("Invalid phone number")
                     else:
                         success = register_user(
                             account_name=username,
@@ -75,6 +89,7 @@ def show_auth():
                             st.success("Account created! You can now log in.")
                         else:
                             st.warning("Registration failed: username/email may already exist.")
+
 
 
     st.markdown("---")

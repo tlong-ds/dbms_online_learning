@@ -87,6 +87,7 @@ def convert_to_documents(courses: list[dict]) -> list[Document]:
         documents.append(Document(page_content=text, metadata=metadata))
     return documents
 
+
 # --- Get existing data from Qdrant ---
 def get_existing_qdrant_data() -> tuple[set[int], dict[int,str]]:
     qdrant_ids: set[int] = set()
@@ -148,7 +149,7 @@ def sync_courses_to_qdrant():
             metadata_payload_key="metadata",
         )
         vs.add_documents(docs)
-        print(f"✅ Added/Updated: {len(docs)} documents.")
+        print(f"Added/Updated: {len(docs)} documents.")
 
     # 6) Xoá những khóa đã gỡ
     if removed_ids:
@@ -159,11 +160,14 @@ def sync_courses_to_qdrant():
         print(f"🗑 Removed: {len(removed_ids)} documents.")
 
     print(
-        f"🔄 Sync completed. "
+        f"Sync completed. "
         f"New: {len(new_ids)}, "
         f"Updated: {len(updated_ids)}, "
         f"Removed: {len(removed_ids)}"
     )
+    collection_info = client.get_collection(QDRANT_COLLECTION_NAME)
+    total_points = collection_info.points_count
+    print(f"Number of vector in Vectordb: {total_points}")
 
 # --- Lấy vectorstore cho các chain khác ---
 def get_vectorstore() -> Qdrant:
@@ -174,3 +178,18 @@ def get_vectorstore() -> Qdrant:
         content_payload_key="page_content",
         metadata_payload_key="metadata",
     )
+
+
+def reset_qdrant_collection():
+    # Nếu collection tồn tại thì xóa đi
+    collections = client.get_collections().collections
+    if any(c.name == QDRANT_COLLECTION_NAME for c in collections):
+        client.delete_collection(QDRANT_COLLECTION_NAME)
+        print(f"🧹 Đã xoá collection: {QDRANT_COLLECTION_NAME}")
+
+    # Tạo lại collection mới
+    client.create_collection(
+        collection_name=QDRANT_COLLECTION_NAME,
+        vectors_config=VectorParams(size=EMBEDDING_SIZE, distance=Distance.COSINE),
+    )
+    print(f"✅ Đã khởi tạo lại collection: {QDRANT_COLLECTION_NAME}")
