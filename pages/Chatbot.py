@@ -4,7 +4,7 @@ from services.api.db.auth import load_cookies
 import toml
 import os
 from services.api.chatbot.core import get_chat_response
-from services.api.chatbot.retrieval import sync_courses_to_qdrant
+from services.api.chatbot.retrieval import sync_courses_to_qdrant, reset_qdrant_collection
 st.set_page_config(
     page_title="Chat bot",
     layout="wide",
