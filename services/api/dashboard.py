@@ -81,7 +81,7 @@ def show_dashboard_learner():
     if 'view' not in st.session_state:
         st.session_state.view = 'Statistics'
 
-    col = st.columns([1,1,13])
+    col = st.columns([1,1,12])
     with col[0]:
         if st.button("Statistics"):
             st.session_state.view = 'Statistics'

@@ -52,6 +52,7 @@ CREATE TABLE Courses (
 CREATE TABLE Lectures (
   LectureID  INT            AUTO_INCREMENT PRIMARY KEY,
   Title      VARCHAR(100)   NOT NULL,
+  Description TEXT,
   Content    TEXT,
   CourseID   INT            NOT NULL,
   CreatedAt  TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP,
