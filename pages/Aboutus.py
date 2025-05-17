@@ -135,13 +135,21 @@ cols = st.columns(4)
 team = [
     ("Doan Quoc Bao",       "Backend Developer"),
     ("Ly Thanh Long",       "Frontend Developer"),
-    ("Ha Quang Minh",       "Data Engineer"),
-    ("Tran Anh Tuan",       "UI/UX Designer"),
+    ("Tran Anh Tuan",       "Data Engineer"),
+    ("Ha Quang Minh",       "UI/UX Designer"),
 ]
-for (name, role), col in zip(team, cols):
+
+image_paths = [
+    "D:/Minh/Tài liệu học tập (DSEB)/Kì 4/Database Management Systems/Final Project/dbms_online_learning/logo/ava1.webp",
+    "D:/Minh/Tài liệu học tập (DSEB)/Kì 4/Database Management Systems/Final Project/dbms_online_learning/logo/ava2.webp",
+    "D:/Minh/Tài liệu học tập (DSEB)/Kì 4/Database Management Systems/Final Project/dbms_online_learning/logo/ava3.webp",
+    "D:/Minh/Tài liệu học tập (DSEB)/Kì 4/Database Management Systems/Final Project/dbms_online_learning/logo/ava4.webp",
+]
+
+
+for (name, role), img_path, col in zip(team, image_paths, cols):
     with col:
-        # Nếu có ảnh cá nhân, thay đường dẫn bên dưới
-        col.image(f"D:/Minh/Tài liệu học tập (DSEB)/Kì 4/Database Management Systems/Final Project/dbms_online_learning/logo/image1.jpg", width=120)
+        col.image(img_path, width=200)
         st.markdown(f"**{name}**")
         st.markdown(f"*{role}*")
 
