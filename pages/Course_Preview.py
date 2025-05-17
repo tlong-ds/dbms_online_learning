@@ -46,7 +46,7 @@ cur = conn.cursor()
 
 # 1. Ratings
 cur.execute(
-    "SELECT COUNT(*), COALESCE(AVG(Rating),0) FROM CourseStatuses WHERE CourseID=%s",
+    "SELECT COUNT(*), COALESCE(AVG(Rating),0) FROM Enrollments WHERE CourseID=%s",
     (course_id,)
 )
 review_count, avg_rating = cur.fetchone()
@@ -92,19 +92,21 @@ with cols[0]:
             st.text("No image available")
     else:
         st.text("No image available")
+        
 with cols[1]:
     st.markdown(f"## {course_name}")
     st.markdown(f"**Instructor:** {instructor_name}")
     st.markdown(f"⭐ {avg_rating:.1f} **|** {total_learners} enrolled")
+
 with cols[2]:
     if not get_enrollment_date(course_id):
         if st.button("Enroll Now"):
             enroll(course_id)
-            st.experimental_rerun()
+            st.rerun()
     else:
         if st.button("Go To Course"):
             redirect = "/Course_Content?" + urlencode({"course_id": course_id})
-            st.experimental_set_query_params(redirect=redirect)
+            #st.experimental_set_query_params(redirect=redirect)
 st.divider()
 
 # --- SUMMARY BOX ---

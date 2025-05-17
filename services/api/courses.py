@@ -91,6 +91,7 @@ def get_enrollment_date(course_id, learner_id=st.session_state.id):
         """, (learner_id, course_id))
         data = cursor.fetchone()
         return data[0] if data else None
+    
     except Exception as e:
         st.error(str(e))
 
@@ -99,9 +100,9 @@ def enroll(course_id, learner_id=st.session_state.id, enroll_date=datetime.today
     cursor = conn.cursor()
     try:
         cursor.execute(
-    "CALL sp_EnrollLearner(%s, %s, %s)",
-    (learner_id, course_id, enroll_date)
-)
+            "CALL sp_EnrollLearner(%s, %s, %s)",
+            (learner_id, course_id, enroll_date)
+        )
         conn.commit()
         st.success("Successfully enrolled")
         st.rerun()
@@ -138,7 +139,8 @@ def courses_card(df):
             </a>
         </div>
         """, unsafe_allow_html=True)
-def courses_list(df):
+
+def courses_list(df, selected_col = ["Instructor Name", "Average Rating"]):
     view = df.fillna({"Average Rating": 0.0})
     view["Course Link"] = view.apply(
         lambda row: f"./Course_Preview?"
@@ -148,7 +150,8 @@ def courses_list(df):
                     f"instructor_name={row['Instructor Name']}&"
                     f"average_rating={row['Average Rating']}", axis=1)
 
-    view = view[["Course Link", "Instructor Name", "Average Rating"]]
+    selected_col.insert(0, "Course Link")
+    view = view[selected_col]
 
     st.data_editor(
         view,
@@ -230,3 +233,26 @@ def get_lectures(course_id: int):
     cursor.close()
     conn.close()
     return [{"id": r[0], "title": r[1]} for r in rows]
+
+def instructed_courses_list(df):
+    view = df.fillna({"Average Rating": 0.0})
+    view["Course Link"] = view.apply(
+        lambda row: f"./Course_Preview?"
+                    f"course_id={row['CourseID']}&"
+                    f"course_name={row['Course Name']}&",
+        axis = 1
+    )
+    view = view[["Course Link", "Total Learners", "Average Rating"]]
+    st.data_editor(
+        view,
+        hide_index=True,
+        use_container_width=True,
+        column_config={
+            "Course Link": st.column_config.LinkColumn(
+                label="Course Name",
+                help="Click to view course details",
+                display_text=r"course_name=([^&]+)"
+            )
+        },
+        disabled=["widgets", "Course Link"]
+    )
