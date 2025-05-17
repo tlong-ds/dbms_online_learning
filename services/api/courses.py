@@ -126,30 +126,6 @@ def enroll(course_id, learner_id=st.session_state.id, enroll_date=datetime.today
         cursor.close()
         conn.close()
 
-def courses_card(df):
-    cols = st.columns(4)
-    for i in range(4):
-        params = {
-            "course_id": df.loc[i, "CourseID"],
-            "course_name": df.loc[i, "Course Name"],
-            "instructor_id": df.loc[i, "Instructor ID"],
-            "instructor_name": df.loc[i, "Instructor Name"],
-            "average_rating": df.loc[i, 'Average Rating'] if 'Average Rating' in df.columns and not pd.isna(df.loc[i, 'Average Rating']) else 0,
-        }
-
-        href = f"./Course_Preview?{urlencode(params)}"
-        cols[i].markdown(f"""
-        <div class="card-container">
-            <a href={href} class="card">
-                <img src="https://i.imgur.com/O3GVLty.jpeg" alt="Course Image">
-                <div class="card-body">
-                    <div class="card-university">{params["instructor_name"]}</div>
-                    <div class="card-title">{params["course_name"]}</div>
-                    <div class="card-footer" style="text-align: right;">{round(params["average_rating"],1)} ⭐️</div>
-                </div>
-            </a>
-        </div>
-        """, unsafe_allow_html=True)
 
 def courses_list(df, selected_col = ["Instructor Name", "Average Rating"]):
     view = df.fillna({"Average Rating": 0.0})
