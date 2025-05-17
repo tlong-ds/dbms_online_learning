@@ -85,7 +85,7 @@ except json.JSONDecodeError:
 
 # Other computed fields
 total_learners = get_total_learners(course_id)
-duration_week = max(1, round(total_hours / 10))
+duration_week = max(1, round(total_hours / 20))
 
 # --- HEADER ---
 cols = st.columns([1, 6, 1])

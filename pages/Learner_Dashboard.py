@@ -13,6 +13,3 @@ Visual.initial()
 
 if st.session_state.role == "Learner":
     show_dashboard_learner()
-
-elif st.session_state.role == "Instructor":
-    show_dashboard_instructor()

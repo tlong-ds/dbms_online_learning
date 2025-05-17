@@ -73,8 +73,8 @@ class Visual:
                 st.divider()
                 if st.button("Settings"):
                     switch_page("Settings")
-                if st.button("Feedback"):
-                    switch_page("Feedback")
+                if st.button("About us"):
+                    switch_page("Aboutus")
                 st.divider()
                 
                 if st.button("Log out"):

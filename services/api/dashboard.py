@@ -70,15 +70,14 @@ def show_dashboard_learner():
     conn.close()
 
     st.title("Learning Dashboard")
-    st.markdown(f"Hello **{learner_name}** - here’s your progress overview.")
+    st.markdown(f"Hello **{learner_name}** - here's your progress overview.")
     c1, c2, c3, c4 = st.columns(4)
     c1.metric("Courses Enrolled", enrolled)
     c2.metric("Courses Completed", completed)
     c3.metric("Completion Rate", rate)
     c4.metric("Lectures Passed", passed)
 
-    # --- view selector buttons ---
-    if 'view' not in st.session_state:
+    if not st.session_state.view:
         st.session_state.view = 'Statistics'
 
     col = st.columns([1,1,12])
@@ -88,10 +87,6 @@ def show_dashboard_learner():
     with col[1]:
         if st.button("Enrolled course"):
             st.session_state.view = 'Enrolled course'
-
-    st.markdown(
-    """""",
-    unsafe_allow_html=True)
 
     # --- view: Statistics ---
     if st.session_state.view == 'Statistics':
