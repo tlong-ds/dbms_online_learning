@@ -73,7 +73,7 @@ def show_auth():
                         st.warning("Please enter a valid email address (e.g., example@gmail.com).")
                     elif password != confirm:
                         st.error("Passwords do not match.")
-                    elif len(phone) < 9:
+                    elif role == "Learner" and len(phone) < 9:
                         st.error("Invalid phone number")
                     else:
                         success = register_user(
