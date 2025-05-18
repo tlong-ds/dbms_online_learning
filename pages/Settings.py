@@ -1,6 +1,6 @@
 import streamlit as st
 from style.ui import Visual
-from services.api.settings import info, security, appearance, about
+from services.api.settings import info, security, appearance
 from services.api.db.auth import load_cookies
 import toml
 import os
@@ -15,7 +15,7 @@ st.set_page_config(
 load_cookies()
 Visual.initial()
 
-if "view" not in st.session_state:
+if not st.session_state.view:
     st.session_state.view = "info"
 
 def show_settings():
@@ -27,9 +27,7 @@ def show_settings():
         if st.button("Security"):
             st.session_state.view = "security"
         if st.button("Appearance"):
-            st.session_state.view = "appearance"                
-        if st.button("About Us"):
-            st.session_state.view = "about"
+            st.session_state.view = "appearance"    
         
     with col2:
         if st.session_state.view == "info":
@@ -38,7 +36,5 @@ def show_settings():
             security()
         if st.session_state.view == "appearance":
             appearance()
-        if st.session_state.view == "about":
-            about() 
 
 show_settings()

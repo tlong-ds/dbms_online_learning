@@ -4,7 +4,6 @@ from style.ui import Visual
 import os
 import toml
 from services.api.db.auth import load_cookies
-load_cookies()
 Visual.initial()
 
 def main():

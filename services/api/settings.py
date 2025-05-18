@@ -86,21 +86,4 @@ def security():
                         npw, 
                         cf)
 
-# Setting for About
-def about():
-    st.header("The Learning House")
-    st.markdown("<p>The Best Learning Platform for Learners and Instructors!</p>", unsafe_allow_html=True)
-    st.markdown('''<b>Our Missions</b>: Empowering education through open-source innovation
-    ''', unsafe_allow_html=True)
-    st.markdown('''<b>Meet Our Specialists</b>:                           
-    ''', unsafe_allow_html=True)
-    st.markdown('''
-                
-    - Doan Quoc Bao
-                
-    - Ly Thanh Long
-                
-    - Ha Quang Minh
-                
-    - Tran Anh Tuan                             
-    ''', unsafe_allow_html=True)
+
