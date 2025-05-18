@@ -169,7 +169,6 @@ def sync_courses_to_qdrant():
     total_points = collection_info.points_count
     print(f"Number of vector in Vectordb: {total_points}")
 
-# --- Lấy vectorstore cho các chain khác ---
 def get_vectorstore() -> Qdrant:
     return Qdrant(
         client=client,
@@ -181,15 +180,13 @@ def get_vectorstore() -> Qdrant:
 
 
 def reset_qdrant_collection():
-    # Nếu collection tồn tại thì xóa đi
     collections = client.get_collections().collections
     if any(c.name == QDRANT_COLLECTION_NAME for c in collections):
         client.delete_collection(QDRANT_COLLECTION_NAME)
-        print(f"🧹 Đã xoá collection: {QDRANT_COLLECTION_NAME}")
+        print(f"Đã xoá collection: {QDRANT_COLLECTION_NAME}")
 
-    # Tạo lại collection mới
     client.create_collection(
         collection_name=QDRANT_COLLECTION_NAME,
         vectors_config=VectorParams(size=EMBEDDING_SIZE, distance=Distance.COSINE),
     )
-    print(f"✅ Đã khởi tạo lại collection: {QDRANT_COLLECTION_NAME}")
+    print(f"Đã khởi tạo lại collection: {QDRANT_COLLECTION_NAME}")

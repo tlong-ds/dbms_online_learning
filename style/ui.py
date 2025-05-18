@@ -62,7 +62,7 @@ class Visual:
                         switch_page("Learner Notebook")
                     if st.button("Focus Timer"):
                         switch_page("Learner Timer")
-                    if st.button("Chat bot"):
+                    if st.button("EduMate"):
                         switch_page("Chatbot")
                 # Instructor
                 if st.session_state.role == "Instructor":

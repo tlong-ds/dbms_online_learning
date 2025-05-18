@@ -11,11 +11,16 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
+
 load_cookies()
 Visual.initial()
 
-if st.button("Reload vectordb"):
-    sync_courses_to_qdrant()
+col_left, col_right = st.columns([20, 1])
+
+with col_right:
+    if st.button("🔄", key="reload_vectordb", help="Reload vectordb"):
+        #reset_qdrant_collection()
+        sync_courses_to_qdrant()
 
 
 st.markdown(
@@ -27,7 +32,7 @@ st.markdown(
         font-weight: bold;
     }
     </style>
-    <h1 class="title">Chatbot</h1>
+    <h1 class="title">EduMate</h1>
     """,
     unsafe_allow_html=True
 )
