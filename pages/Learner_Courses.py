@@ -33,9 +33,8 @@ st.markdown(
 )
 
 # ══════════════════ DỮ LIỆU ══════════════════
-df_raw = get_courses()  # DataFrame có cột CourseID, Course Name, Instructor..., EnrolledCount
+df_raw = get_courses()
 
-# Bulk-fetch rating info cho tất cả course
 course_ids = [int(row['CourseID']) for _, row in df_raw.iterrows() if row.get('CourseID')]
 rating_map: dict[int, tuple[int, float]] = {}
 if course_ids:
@@ -61,10 +60,10 @@ ROWS_PER_CLICK    = 5
 CARDS_PER_ROW_MAP = {"xl": 4, "lg": 6, "md": 8}
 VIEW_LABEL2KEY    = {"Extra large icons":"xl", "Large icons":"lg", "Medium icons":"md", "List":"list"}
 VIEW_KEY2LABEL    = {v:k for k,v in VIEW_LABEL2KEY.items()}
-DEFAULT_VIEW_KEY  = "md"
+DEFAULT_VIEW_KEY  = "xl"
 
 # Sort config
-default_sort = "Name (A → Z)"
+default_sort = "Rating (High → Low)"
 SORT_OPTIONS = {
     "Name (A → Z)": ("Course Name", True),
     "Name (Z → A)": ("Course Name", False),
@@ -131,8 +130,7 @@ def render_cards(df_subset: pd.DataFrame, cards_per_row: int):
 def show_courses():
     st.title("Courses")
     cards_per_row = CARDS_PER_ROW_MAP.get(st.session_state.view, CARDS_PER_ROW_MAP[DEFAULT_VIEW_KEY])
-    weights = [1] * (cards_per_row - 2) + [2, 2]
-    header_cols = st.columns(weights, gap="small", vertical_alignment="top")
+    header_cols = st.columns([13,2,2], gap="small", vertical_alignment="top")
 
     # Sort selector
     with header_cols[-2]:

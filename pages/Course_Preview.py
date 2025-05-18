@@ -170,7 +170,10 @@ if st.session_state.role == "Learner":
     st.markdown(f"## Lectures — {len(lectures)} lecture{'s' if len(lectures)>1 else ''}")
     for lec in lectures:
         link = "/Lecture_Preview?" + urlencode({"lecture_id": lec['id']})
-        st.markdown(f"- [{lec['title']}]({link})")
+        st.markdown(f"[{lec['title']}]({link})")
+        if lec.get("description"):
+            st.markdown(f"  - {lec['description']}")
+    st.divider()
 
 @st.dialog("Create New Lecture")
 def create_lecture_dialog(course_id=course_id):

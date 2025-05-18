@@ -358,7 +358,7 @@ def get_lectures(course_id: int):
     conn = connect_db()
     cursor = conn.cursor()
     cursor.execute("""
-        SELECT LectureID, Title
+        SELECT LectureID, Title, Description as description
         FROM Lectures
         WHERE CourseID = %s
         ORDER BY CreatedAt
@@ -366,7 +366,7 @@ def get_lectures(course_id: int):
     rows = cursor.fetchall()
     cursor.close()
     conn.close()
-    return [{"id": r[0], "title": r[1]} for r in rows]
+    return [{"id": r[0], "title": r[1], "description": r[2]} for r in rows]
 
 def get_lecture_id(course_id: int, lecture_title: str):
     conn = connect_db()
