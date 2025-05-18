@@ -100,3 +100,28 @@ CREATE TABLE Notebooks (
   FOREIGN KEY (CourseID)   REFERENCES Courses(CourseID),
   FOREIGN KEY (LectureID)  REFERENCES Lectures(LectureID)
 );
+
+CREATE TABLE Quizzes (
+    QuizID INT AUTO_INCREMENT PRIMARY KEY,
+    LectureID INT,
+    Title VARCHAR(255) NOT NULL,
+    Description TEXT,
+    CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (LectureID) REFERENCES Lectures(LectureID) ON DELETE CASCADE
+);
+
+
+CREATE TABLE Questions (
+    QuestionID INT AUTO_INCREMENT PRIMARY KEY,
+    QuizID INT,
+    QuestionText TEXT NOT NULL,
+    FOREIGN KEY (QuizID) REFERENCES Quizzes(QuizID) ON DELETE CASCADE
+);
+
+CREATE TABLE Options (
+    OptionID INT AUTO_INCREMENT PRIMARY KEY,
+    QuestionID INT,
+    OptionText VARCHAR(255) NOT NULL,
+    IsCorrect BOOLEAN DEFAULT FALSE,
+    FOREIGN KEY (QuestionID) REFERENCES Questions(QuestionID) ON DELETE CASCADE
+);
