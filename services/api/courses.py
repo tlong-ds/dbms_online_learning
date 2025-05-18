@@ -439,4 +439,44 @@ def get_user_courses(user_id=st.session_state.id):
     conn.close()
     return [{"id": r[0], "name": r[1]} for r in rows]
 
+def create_quiz(lecture_id, title, description, questions):
+    conn = connect_db()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            "INSERT INTO Quizzes (LectureID, Title, Description) VALUES (%s, %s, %s)",
+            (lecture_id, title, description)
+        )
+        conn.commit()
+        st.success(f"Quiz '{title}' created successfully!")
+        cursor.execute(
+            "SELECT LAST_INSERT_ID()"
+        )
+        quiz_id = cursor.fetchone()[0]
+        for question in questions:
+            cursor.execute(
+                "INSERT INTO Questions (QuizID, QuestionText) VALUES (%s, %s)",
+                (quiz_id, question['question'])
+            )
+            conn.commit()
+            cursor.execute("SELECT LAST_INSERT_ID()")
+            question_id = cursor.fetchone()[0]
+            answers = question['answers']
+            for i in range(4):
+                cursor.execute("""
+                    INSERT INTO Options (QuestionID, OptionText, IsCorrect)
+                    VALUES (%s, %s, %s)
+                """, (question_id, answers[f"Option {i + 1}"], answers[f"Correct"] == f"Option {i + 1}"))
+            conn.commit()
+        conn.commit()
+        return True
+    except Exception as e:
+        conn.rollback()
+        st.error(f"Error creating quiz: {e}")
+        return False
+    finally:
+        cursor.close()
+        conn.close()
+
+
 
