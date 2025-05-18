@@ -35,14 +35,45 @@ def connect_db():
         cursorclass=pymysql.cursors.DictCursor,
     )
 
-def load_sql():
-    """ Trả về list[dict] với đúng tên field từ DB """
+def load_sql_courses(): #-> list[dict]
     with connect_db() as conn:
         with conn.cursor() as cursor:
             cursor.execute("SELECT * FROM Courses")
             return cursor.fetchall()
 
-# --- Embedding model & Qdrant client ---
+
+def load_sql_lectures():  # -> list[dict]
+    with connect_db() as conn:
+        with conn.cursor() as cursor:
+            cursor.execute("""
+                SELECT LectureID, Title, Description, Content
+                FROM Lectures
+            """)
+            return cursor.fetchall()
+
+def convert_to_documents_lectures(lectures: list[dict]) -> list[Document]:
+    documents: list[Document] = []
+    for l in lectures:
+        # 1) Build the textual content
+        parts = [
+            f"Lecture Title: {l.get('Title', 'No title')}",  
+            f"Description: {l.get('Description', 'No description')}",
+            f"Content: {l.get('Content', 'None')}",
+        ]
+        text = ", ".join(parts)
+        text = re.sub(r"\s+", " ", text).strip()
+
+        # 2) Assemble metadata
+        metadata = {
+            "LectureID": l["LectureID"],
+            # "CourseID": l["CourseID"],  # Optional if needed
+        }
+
+        documents.append(Document(page_content=text, metadata=metadata))
+    return documents
+
+
+
 embedding_model = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL)
 client = qdrant_client.QdrantClient(QDRANT_HOST, api_key=QDRANT_API_KEY)
 
