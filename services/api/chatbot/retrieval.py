@@ -39,18 +39,15 @@ def connect_db():
         cursorclass=pymysql.cursors.DictCursor,
     )
 
-#---- Lectures processing
 
-def hash_lectures(l: dict) ->str:
-    text = "|".join([
-        str(l.get("CourseName", "")),
-        str(l.get("Descriptions", "")),
-        str(l.get("Skills", "")),
-        str(l.get("EstimatedDuration", "")),
-        str(l.get("Difficulty", "")),
-        str(l.get("AverageRating", "")),
-    ])
-    return hashlib.md5(text.encode("utf-8")).hexdigest()
+def load_sql_courses(): #-> list[dict]
+    with connect_db() as conn:
+        with conn.cursor() as cursor:
+            cursor.execute("""
+                SELECT LectureID, Title, Description, Content
+                FROM Lectures
+            """)
+            return cursor.fetchall()
 
 def load_sql_lectures():  # -> list[dict]
     with connect_db() as conn:
@@ -64,6 +61,13 @@ def load_sql_lectures():  # -> list[dict]
 def convert_to_documents_lectures(lectures: list[dict]) -> list[Document]:
     documents: list[Document] = []
     for l in lectures:
+        # 1) Build the textual content
+        parts = [
+            f"Lecture Title: {l.get('Title', 'No title')}",  
+
+def convert_to_documents_lectures(lectures: list[dict]) -> list[Document]:
+    documents: list[Document] = []
+    for l in lectures:
         parts = [
             f"Lecture Title: {l.get('Title', 'No title')}", 
             f"Description: {l.get('Description', 'No description')}",
@@ -72,13 +76,23 @@ def convert_to_documents_lectures(lectures: list[dict]) -> list[Document]:
         text = ", ".join(parts)
         text = re.sub(r"\s+", " ", text).strip()
 
+
+        # 2) Assemble metadata
+        metadata = {
+            "LectureID": l["LectureID"],
+            # "CourseID": l["CourseID"],  # Optional if needed
+
         metadata = {
             "LectureID": l["LectureID"],
             "hash": hash_lectures(l)
+
         }
 
         documents.append(Document(page_content=text, metadata=metadata))
     return documents
+
+embedding_model = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL)
+client = qdrant_client.QdrantClient(QDRANT_HOST, api_key=QDRANT_API_KEY)
 
 def get_existing_qdrant_data_lectures() -> tuple[set[int], dict[int,str]]:
     qdrant_ids: set[int] = set()
@@ -177,14 +191,6 @@ def reset_qdrant_collection():
         vectors_config=VectorParams(size=EMBEDDING_SIZE, distance=Distance.COSINE),
     )
     print(f"Đã khởi tạo lại collection: {QDRANT_COLLECTION_NAME_LECTURES}")
-
-
-
-
-
-
-
-
 
 
 
