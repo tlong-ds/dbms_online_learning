@@ -10,7 +10,8 @@ from services.api.db.auth import load_cookies
 import toml
 import os
 from services.api.chatbot.core import get_chat_response
-from services.api.chatbot.retrieval import sync_courses_to_qdrant, reset_qdrant_collection
+from services.api.chatbot.retrieval import sync_courses_to_qdrant, reset_qdrant_collection, sync_lectures_to_qdrant
+
 
 
 load_cookies()
@@ -21,6 +22,7 @@ col_left, col_right = st.columns([20, 1])
 with col_right:
     if st.button("🔄", key="reload_vectordb", help="Reload vectordb"):
         #reset_qdrant_collection()
+        #sync_lectures_to_qdrant()
         sync_courses_to_qdrant()
 
 

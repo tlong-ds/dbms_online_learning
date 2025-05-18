@@ -9,6 +9,7 @@ from style.ui import Visual
 from services.api.db.auth import load_cookies
 from services.api.courses import lecture_list, file_exists, get_quiz, update_score
 from services.api.lecture_display import get_lecture_data
+from services.api.chatbot.core import get_chat_response_lecture
 from streamlit_extras.switch_page_button import switch_page
 
 # --- SETUP ---
@@ -44,6 +45,16 @@ if "lec_idx" not in st.session_state:
     else:
         st.session_state.lec_idx = 0
 
+@st.dialog("AI Teacher Assistant")
+def ask_assistant():
+  with st.form(key="chat_form"):
+      user_input = st.text_input("Ask anything about this lecture...", key="chat_input")
+      submit = st.form_submit_button("Send")
+
+  if submit and user_input:
+      try:
+          answer = get_chat_response_lecture(user_input, lecture_id)
+
 # --- LAYOUT: NAV + CONTENT ---
 col1, col2, col3 = st.columns([1.5, 0.5, 9])
 
@@ -67,7 +78,8 @@ with col3:
     course_id = lecture["CourseID"]
     if st.session_state.view_mode == "lecture":
         if lecture:
-            st.markdown(f"# {lecture['Title']}")
+            top_cols = st.columns([16, 2])
+            top_cols[0].markdown(f"# {lecture['Title']}")
             st.write(lecture['Description'])
             # Video
             video_path = f"videos/cid{course_id}/lid{lec_id}/vid_lecture.mp4"
@@ -78,6 +90,8 @@ with col3:
             st.markdown("---")
             st.markdown(f"## Content")
             st.markdown(lecture["Content"], unsafe_allow_html=True)
+            if top_cols[1].button("Assistant"):
+                ask_assistant()
         else:
             st.error("Unable to load lecture content.")
     else:
@@ -115,5 +129,4 @@ with col3:
 
         
         
-        
-        
+
