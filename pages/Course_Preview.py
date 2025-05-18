@@ -110,15 +110,7 @@ with cols[1]:
     st.markdown(f"## {course_name}")
     st.markdown(f"**Instructor:** {instructor_name}")
     st.markdown(f"⭐ {avg_rating:.1f} **|** {total_learners} enrolled")
-with cols[2]:
-    if not get_enrollment_date(course_id):
-        if st.button("Enroll Now"):
-            enroll(course_id)
-            st.experimental_rerun()
-    else:
-        if st.button("Go To Course"):
-            redirect = "/Course_Content?" + urlencode({"course_id": course_id})
-            st.experimental_set_query_params(redirect=redirect)
+
 st.divider()
 
 # --- SUMMARY BOX ---
@@ -144,7 +136,7 @@ with sum_cols[4]:
 st.divider()
 
 
-f st.session_state.role == "Learner":
+if st.session_state.role == "Learner":
     # --- ENROLLMENTS ---
     if not get_enrollment_date(course_id):
         if cols[2].button("Enroll Now"):
@@ -248,6 +240,9 @@ def create_lecture_dialog(course_id=course_id):
                 upload_video(course_id, lecture_id, video)
             print(questions)
             create_quiz(lecture_id, quiz_title, quiz_description, questions)
+
+
+
 if st.session_state.role == "Instructor":
     st.write("Lecture Preview")
     # maybe switch to api
