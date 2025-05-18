@@ -4,10 +4,11 @@ from style.ui import Visual
 from services.api.db.auth import load_cookies
 from services.api.courses import lecture_list, file_exists, get_quiz, update_score
 from services.api.lecture_display import get_lecture_data
+from services.api.chatbot.core import get_chat_response_lecture
 # --- SETUP ---
 st.set_page_config(
     page_title="Lecture & Assignment",
-    page_icon="⚙️",
+    page_icon="📖",
     layout="wide",
     initial_sidebar_state="collapsed",
 )
@@ -40,6 +41,20 @@ if "lec_idx" not in st.session_state:
         st.session_state.lec_idx = int(matches[0]) if len(matches) else 0
     else:
         st.session_state.lec_idx = 0
+
+st.markdown("---")
+st.subheader("AI Teacher Assistant")
+with st.form(key="chat_form"):
+    user_input = st.text_input("Ask anything about this lecture...", key="chat_input")
+    submit = st.form_submit_button("Send")
+
+if submit and user_input:
+    try:
+        answer = get_chat_response_lecture(user_input, lecture_id)
+        st.markdown("**AI Answer:**")
+        st.success(answer)
+    except Exception as e:
+        st.error(f"Failed to get response: {e}")
 
 # --- LAYOUT: NAV + CONTENT ---
 col1, col2, col3 = st.columns([1.5, 0.5, 9])
@@ -110,5 +125,4 @@ with col3:
         else:
             st.write("No questions available.")
         
-        
-        
+
