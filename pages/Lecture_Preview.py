@@ -1,25 +1,28 @@
-import re
 import streamlit as st
-from style.ui import Visual
-from services.api.db.auth import load_cookies
-from services.api.courses import lecture_list, file_exists, get_quiz, update_score
-from services.api.lecture_display import get_lecture_data
-# --- SETUP ---
 st.set_page_config(
     page_title="Lecture & Assignment",
     page_icon="📖",
     layout="wide",
     initial_sidebar_state="collapsed",
 )
+from style.ui import Visual
+from services.api.db.auth import load_cookies
+from services.api.courses import lecture_list, file_exists, get_quiz, update_score
+from services.api.lecture_display import get_lecture_data
+from streamlit_extras.switch_page_button import switch_page
+
+# --- SETUP ---
+
 
 load_cookies()
 Visual.initial()
 
 # --- READ QUERY PARAMS ---
 params = st.query_params
+if "lecture_id" not in st.session_state:
+    switch_page(f"{st.session_state.role}_Courses")
 
-
-lecture_id = int(params.get("lecture_id"))
+lecture_id = int(params.get("lecture_id", st.session_state.lecture_id))
 lec_detail = get_lecture_data(lecture_id)
 if lec_detail:
     course_id = lec_detail.get("CourseID", 0)

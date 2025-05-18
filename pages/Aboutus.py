@@ -1,8 +1,4 @@
 import streamlit as st
-from style.ui import Visual
-from services.api.db.auth import load_cookies
-from services.api.courses import connect_db
-
 # --- PAGE SETUP ---
 st.set_page_config(
     page_title="About Us – The Learning House",
@@ -10,6 +6,11 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="collapsed",
 )
+from style.ui import Visual
+from services.api.db.auth import load_cookies
+from services.api.courses import connect_db
+
+
 load_cookies()
 Visual.initial()
 

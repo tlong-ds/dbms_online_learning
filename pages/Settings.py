@@ -1,16 +1,17 @@
 import streamlit as st
-from style.ui import Visual
-from services.api.settings import info, security, appearance
-from services.api.db.auth import load_cookies
-import toml
-import os
-
 st.set_page_config(
     page_title="Setting",
     page_icon="⚙️",
     layout="wide",
     initial_sidebar_state="collapsed",
 )
+
+from style.ui import Visual
+from services.api.settings import info, security, appearance
+from services.api.db.auth import load_cookies
+import toml
+import os
+
 
 load_cookies()
 Visual.initial()

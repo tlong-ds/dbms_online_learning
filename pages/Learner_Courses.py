@@ -1,19 +1,17 @@
-import re
-import math
 import streamlit as st
-from urllib.parse import urlencode
-from style.ui import Visual
-from services.api.courses import get_courses, courses_list, connect_db
-from services.api.db.auth import load_cookies
-import pandas as pd
-
-# ══════════════════ CẤU HÌNH TRANG ══════════════════
 st.set_page_config(
     page_title="Courses",
     page_icon="✍️",
     layout="wide",
     initial_sidebar_state="collapsed",
 )
+import re
+import math
+from urllib.parse import urlencode
+from style.ui import Visual
+from services.api.courses import get_courses, courses_list, connect_db
+from services.api.db.auth import load_cookies
+import pandas as pd
 
 load_cookies()
 Visual.initial()

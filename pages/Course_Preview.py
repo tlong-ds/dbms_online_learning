@@ -1,6 +1,12 @@
-import os
 import streamlit as st
+# --- PAGE SETUP ---
+st.set_page_config(
+    page_title="Course Preview",
+    layout="wide",
+    initial_sidebar_state="collapsed",
+)
 import json
+import os
 from style.ui import Visual
 from services.api.db.auth import load_cookies
 from services.api.courses import (
@@ -20,13 +26,9 @@ from services.api.courses import (
 )
 from streamlit_extras.switch_page_button import switch_page
 from urllib.parse import urlencode
+import webbrowser
 
-# --- PAGE SETUP ---
-st.set_page_config(
-    page_title="Course Preview",
-    layout="wide",
-    initial_sidebar_state="collapsed",
-)
+
 load_cookies()
 Visual.initial()
 
@@ -143,10 +145,10 @@ if st.session_state.role == "Learner":
             enroll(course_id)
             st.rerun()
     else:
+        temp_lecture = get_lectures(course_id=course_id)
         if cols[2].button("Go To Course"):
-            temp_lecture = get_lectures(course_id= course_id)
-            redirect = "/Lecture_Preview?" + urlencode({"lecture_id": temp_lecture[0]["id"]})
-            #st.switch_page(redirect)
+            st.session_state.lecture_id = temp_lecture[0]["id"]
+            switch_page("Lecture_Preview")
    
     # --- DESCRIPTION ---
     course_desc = get_course_description(course_id)
