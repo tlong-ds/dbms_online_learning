@@ -4,13 +4,21 @@ import json
 from style.ui import Visual
 from services.api.db.auth import load_cookies
 from services.api.courses import (
-    get_enrollment_date,
-    enroll,
-    connect_db,
-    get_total_learners,
-    get_lectures,
-    get_course_description,
+  get_enrollment_date, 
+  enroll, 
+  connect_db,
+  get_total_learners,
+  get_lectures,
+  get_lecture_id,
+  get_course_description,
+  file_exists,
+  learner_list, 
+  lecture_list, 
+  add_lecture,
+  upload_video,
+  create_quiz
 )
+from streamlit_extras.switch_page_button import switch_page
 from urllib.parse import urlencode
 
 # --- PAGE SETUP ---
@@ -136,28 +144,143 @@ with sum_cols[4]:
 st.divider()
 
 
-# --- DESCRIPTION ---
-course_desc = get_course_description(course_id)
-if course_desc:
-    st.markdown("## Description")
-    st.write(course_desc)
-    st.divider()
+f st.session_state.role == "Learner":
+    # --- ENROLLMENTS ---
+    if not get_enrollment_date(course_id):
+        if cols[2].button("Enroll Now"):
+            enroll(course_id)
+            st.experimental_rerun()
+    else:
+        if cols[2].button("Go To Course"):
+            redirect = "/Course_Content?" + urlencode({"course_id": course_id})
+            #st.experimental_set_query_params(redirect=redirect)
+   
+    # --- DESCRIPTION ---
+    course_desc = get_course_description(course_id)
+    if course_desc:
+        st.markdown("## Description")
+        st.write(course_desc)
+        st.divider()
 
-# --- SKILLS YOU'LL GAIN ---
-if skills:
-    st.markdown("## Skills you'll gain")
-    for skill in skills:
-        st.markdown(
-            f"<span style='display:inline-block; background-color:#eef4ff;"
-            f" color:#174ea6; padding:4px 12px; border-radius:12px;"
-            f" margin:2px 4px; font-size:0.9em;'>{skill}</span>",
-            unsafe_allow_html=True,
-        )
-    st.divider()
+    # --- SKILLS YOU'LL GAIN ---
+    if skills:
+        st.markdown("## Skills you'll gain")
+        for skill in skills:
+            st.markdown(
+                f"<span style='display:inline-block; background-color:#eef4ff;"
+                f" color:#174ea6; padding:4px 12px; border-radius:12px;"
+                f" margin:2px 4px; font-size:0.9em;'>{skill}</span>",
+                unsafe_allow_html=True,
+            )
+        st.divider()
+    # --- LECTURES ---
+    lectures = get_lectures(course_id)
+    st.markdown(f"## Lectures — {len(lectures)} lecture{'s' if len(lectures)>1 else ''}")
+    for lec in lectures:
+        link = "/Lecture_Preview?" + urlencode({"lecture_id": lec['id']})
+        st.markdown(f"- [{lec['title']}]({link})")
 
-# --- LECTURES ---
-lectures = get_lectures(course_id)
-st.markdown(f"## Lectures — {len(lectures)} lecture{'s' if len(lectures)>1 else ''}")
-for lec in lectures:
-    link = "/Lecture_Preview?" + urlencode({"lecture_id": lec['id']})
-    st.markdown(f"- [{lec['title']}]({link})")
+@st.dialog("Create New Lecture")
+def create_lecture_dialog(course_id=course_id):
+    st.write("Title")
+    title = st.text_input(label="title", label_visibility="collapsed")
+    st.write("Description")
+    description = st.text_input(label="description", label_visibility="collapsed")
+    st.write("Video Material")
+    video = st.file_uploader(label="video", type=["mp4"], label_visibility="collapsed")
+    st.write("Content")
+    content = st.text_area(label="content", label_visibility="collapsed")
+    st.write("Quiz")
+    st.write("Quiz Title")
+    quiz_title = st.text_input(label="qtitle", label_visibility="collapsed")
+    st.write("Quiz Description")
+    quiz_description = st.text_input(label="qdescription", label_visibility="collapsed")
+    st.write("Number of question")
+    num_questions = st.select_slider(label="number", label_visibility="collapsed", options=range(1,11))
+    questions = []
+    with st.form(key="quiz_form"):
+        questions = []
+        valid = True
+        error_msg = ""
+
+        for i in range(num_questions):
+            st.write(f"Question {i + 1}")
+            question = st.text_input(label=f"question{i}", label_visibility="collapsed")
+            if not question.strip():
+                valid = False
+                error_msg = f"Question {i + 1} is missing."
+
+            answers = {}
+            for j in range(4):
+                st.write(f"Option {j + 1}")
+                answer = st.text_input(label=f"q{i}a{j}", label_visibility="collapsed")
+                if not answer.strip():
+                    valid = False
+                    error_msg = f"Option {j + 1} for question {i + 1} is missing."
+                answers[f"Option {j + 1}"] = answer
+
+            st.write(f"Correct Answer of question {i + 1}")
+            correct_answer = st.selectbox(label=f"correct{i}", options=["Option 1", "Option 2", "Option 3", "Option 4"], label_visibility="collapsed")
+            if not correct_answer:
+                valid = False
+                error_msg = f"Correct answer for question {i + 1} is not selected."
+            else:
+                answers["Correct"] = correct_answer
+
+            questions.append({"question": question, "answers": answers})
+
+        submit_quiz = st.form_submit_button("Save Quiz")
+        if submit_quiz:
+            if not valid:
+                st.error(error_msg)
+            else:
+                st.success("Quiz submitted successfully!")
+                # proceed with saving or further processing
+            
+
+    if st.button("Submit"):
+        if not submit_quiz:
+            st.error("Please fill in the quiz details.")
+        else:
+            add_lecture(course_id, title, description, content)
+            lecture_id = get_lecture_id(course_id, title)
+            if video is not None:
+                upload_video(course_id, lecture_id, video)
+            print(questions)
+            create_quiz(lecture_id, quiz_title, quiz_description, questions)
+if st.session_state.role == "Instructor":
+    st.write("Lecture Preview")
+    # maybe switch to api
+    if "learner_list" not in st.session_state:
+        st.session_state.learner_list = learner_list(course_id)
+    if "lecture_list" not in st.session_state:
+        st.session_state.lecture_list = lecture_list(course_id)
+    if "lec_view" not in st.session_state:
+        st.session_state.lec_view = "learner_list"
+    if "lec_idx" not in st.session_state:
+        st.session_state.lec_idx = -1
+    if "lecture_id" not in st.session_state:
+        st.session_state.lecture_id = -1
+    col1, col2 = st.columns([1, 5])
+    with col1:
+        if st.button("Learners"):
+            st.session_state.lec_view = "learner_list"
+        for i in range(len(st.session_state.lecture_list.index)):
+            if st.button(f"Lecture {i + 1}"):
+                st.session_state.lec_view = "lecture_view"
+                st.session_state.lec_idx = i
+                st.session_state.lecture_id = st.session_state.lecture_list.loc[i, "LectureID"]
+
+        if st.button("Add Lecture"):
+           create_lecture_dialog()
+    with col2:
+        if st.session_state.lec_view == "learner_list":
+            st.data_editor(st.session_state.learner_list, hide_index = True)
+        if st.session_state.lec_view == "lecture_view":
+            row = st.session_state.lecture_list[st.session_state.lecture_list["LectureID"] == st.session_state.lecture_id].iloc[0]
+            st.write(f"Title: {row["Lecture Title"]}")
+            st.write(f"Description: {row["Description"]}")
+            video_path = f"videos/cid{course_id}/lid{st.session_state.lecture_id}/vid_lecture.mp4"
+            if file_exists("tlhmaterials", video_path):
+                st.video(f"https://tlhmaterials.s3-ap-southeast-1.amazonaws.com/" + video_path)
+            st.markdown(row["Content"], unsafe_allow_html=True)
