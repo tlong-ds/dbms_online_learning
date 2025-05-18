@@ -4,7 +4,7 @@ from services.api.db.auth import load_cookies
 import toml
 import os
 from services.api.chatbot.core import get_chat_response
-from services.api.chatbot.retrieval import sync_courses_to_qdrant
+from services.api.chatbot.retrieval import sync_courses_to_qdrant, reset_qdrant_collection
 st.set_page_config(
     page_title="Chat bot",
     layout="wide",
@@ -39,7 +39,7 @@ for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-user_input = st.chat_input("Nhập tin nhắn của bạn...")
+user_input = st.chat_input("What you want to learn...")
 
 if user_input:
     st.session_state.messages.append({"role": "user", "content": user_input})
