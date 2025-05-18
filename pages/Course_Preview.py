@@ -141,7 +141,7 @@ if st.session_state.role == "Learner":
     if not get_enrollment_date(course_id):
         if cols[2].button("Enroll Now"):
             enroll(course_id)
-            st.experimental_rerun()
+            st.rerun()
     else:
         if cols[2].button("Go To Course"):
             redirect = "/Course_Content?" + urlencode({"course_id": course_id})
