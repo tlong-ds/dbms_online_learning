@@ -31,9 +31,24 @@ def get_lecture_data(lecture_id):
     conn = connect_db()
     cursor = conn.cursor()
     try:
-        cursor.execute("SELECT * FROM Lectures WHERE LectureiD = %s", (lecture_id,))
-        lecture_data = conn.fetchone()[0]
-        return {'Title': lecture_data[1], 'Description': lecture_data[2], 'Content': lecture_data[3], 'CourseID': lecture_data[4]}
+        # Lấy đúng các cột cần thiết, đặt LectureID đúng chính tả
+        cursor.execute(
+            "SELECT LectureID, Title, Description, Content, CourseID "
+            "FROM Lectures WHERE LectureID = %s",
+            (lecture_id,)
+        )
+        row = cursor.fetchone()
+        if not row:
+            return None
+
+        # row = (LectureID, Title, Description, Content, CourseID)
+        _, title, description, content, course_id = row
+        return {
+            'Title': title,
+            'Description': description,
+            'Content': content,
+            'CourseID': course_id
+        }
     except Exception as e:
         st.error(f"Error fetching lecture data: {e}")
         return None

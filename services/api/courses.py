@@ -358,7 +358,7 @@ def get_lectures(course_id: int):
     conn = connect_db()
     cursor = conn.cursor()
     cursor.execute("""
-        SELECT LectureID, Title
+        SELECT LectureID, Title, Description as description
         FROM Lectures
         WHERE CourseID = %s
         ORDER BY CreatedAt
@@ -366,7 +366,7 @@ def get_lectures(course_id: int):
     rows = cursor.fetchall()
     cursor.close()
     conn.close()
-    return [{"id": r[0], "title": r[1]} for r in rows]
+    return [{"id": r[0], "title": r[1], "description": r[2]} for r in rows]
 
 def get_lecture_id(course_id: int, lecture_title: str):
     conn = connect_db()
@@ -438,6 +438,68 @@ def create_quiz(lecture_id, title, description, questions):
     finally:
         cursor.close()
         conn.close()
+    
+def get_quiz(lecture_id):
+    conn = connect_db()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            SELECT q.QuizID, q.Title, q.Description
+            FROM Quizzes q
+            JOIN Lectures l ON q.LectureID = l.LectureID
+            WHERE l.LectureID = %s
+        """, (lecture_id,))
+        quiz = cursor.fetchone()
+        if quiz:
+            quiz_id, title, description = quiz
+            cursor.execute("""
+                SELECT q.QuestionID, q.QuestionText, o.OptionText, o.IsCorrect
+                FROM Questions q
+                JOIN Options o ON q.QuestionID = o.QuestionID
+                WHERE q.QuizID = %s
+            """, (quiz_id,))
+            questions = {}
+            for question_id, question_text, option_text, is_correct in cursor.fetchall():
+                if question_id not in questions:
+                    questions[question_id] = {
+                        "question": question_text,
+                        "options": [],
+                        "correct": []
+                    }
+                questions[question_id]["options"].append(option_text)
+                if is_correct:
+                    questions[question_id]["correct"].append(option_text)
+            return {
+                "title": title,
+                "description": description,
+                "questions": questions
+            }
+        else:
+            return None
+    except Exception as e:
+        st.error(f"Error fetching quiz: {e}")
+        return None
+    finally:
+        cursor.close()
+        conn.close()
+
+def update_score(learner_id, course_id, lecture_id, score):
+    conn = connect_db()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            """UPDATE LectureResults
+                SET Score = %s, Date = NOW()
+                WHERE LearnerID = %s AND CourseID = %s AND LectureID = %s""",
+            (score, learner_id, course_id, lecture_id))
+        conn.commit()
+        st.success("Score updated successfully!")
+    except Exception as e:
+        conn.rollback()
+        st.error(f"Error updating score: {e}")
+    finally:
+        cursor.close()
+        conn.close()
 
 def upload_video(course_id, lecture_id, media_file, bucket_name="tlhmaterials"):
     media_path = f"videos/cid{course_id}/lid{lecture_id}/vid_lecture.mp4"
@@ -477,5 +539,4 @@ def upload_video_to_s3(uploaded_file, bucket_name, s3_key):
         ACL="public-read",              # public access if needed
         ContentDisposition="inline"     # forces browser to render instead of download
     )
-
 
