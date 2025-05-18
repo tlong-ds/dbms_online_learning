@@ -190,3 +190,4 @@ def reset_qdrant_collection():
         vectors_config=VectorParams(size=EMBEDDING_SIZE, distance=Distance.COSINE),
     )
     print(f"Đã khởi tạo lại collection: {QDRANT_COLLECTION_NAME}")
+    

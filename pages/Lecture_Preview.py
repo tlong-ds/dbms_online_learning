@@ -8,7 +8,7 @@ from services.api.lecture_display import get_lecture_data
 # --- SETUP ---
 st.set_page_config(
     page_title="Lecture & Assignment",
-    page_icon="⚙️",
+    page_icon="📖",
     layout="wide",
     initial_sidebar_state="collapsed",
 )
@@ -17,12 +17,11 @@ load_cookies()
 Visual.initial()
 
 # --- READ QUERY PARAMS ---
-params = st.experimental_get_query_params()
-if "course_id" in params:
-    course_id = int(params.get("course_id")[0])
-    init_lecture_id = None
-elif "lecture_id" in params:
-    init_lecture_id = int(params.get("lecture_id")[0])
+params = st.query_params
+
+
+if "lecture_id" in params:
+    init_lecture_id = int(params.get("lecture_id"))
     lec_detail = get_lecture_data(init_lecture_id)
     if lec_detail:
         course_id = lec_detail.get("CourseID", 0)
