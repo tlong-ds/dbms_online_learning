@@ -45,15 +45,23 @@ if "lec_idx" not in st.session_state:
     else:
         st.session_state.lec_idx = 0
 
-@st.dialog("AI Teacher Assistant")
+if "ask_history" not in st.session_state:
+    st.session_state["ask_history"] = []
+@st.dialog("Ask EduMate")
 def ask_assistant():
-  with st.form(key="chat_form"):
-      user_input = st.text_input("Ask anything about this lecture...", key="chat_input")
-      submit = st.form_submit_button("Send")
+    user_input = st.chat_input("Ask anything about this lecture...", key="chat_input")
 
-  if submit and user_input:
-      try:
-          answer = get_chat_response_lecture(user_input, lecture_id)
+    if user_input:
+        try:
+            st.session_state.ask_history.append({"role": "user", "content": user_input})
+            with st.chat_message("user"):
+                st.markdown(user_input)
+            answer = get_chat_response_lecture(user_input, lecture_id)
+            st.session_state.ask_history.append({"role": "assistant", "content": answer})
+            with st.chat_message("assistant"):
+                st.markdown(answer)
+        except Exception as e:
+            st.error(f"Failed to get response: {e}")
 
 # --- LAYOUT: NAV + CONTENT ---
 col1, col2, col3 = st.columns([1.5, 0.5, 9])
