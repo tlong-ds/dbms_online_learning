@@ -28,7 +28,7 @@ st.markdown(
     <style>
     .title {
         text-align: center;
-        font-size: 2em;
+        font-size: 4em;
         font-weight: bold;
     }
     </style>
