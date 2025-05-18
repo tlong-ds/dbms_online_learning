@@ -152,49 +152,6 @@ def courses_list(df, selected_col = ["Instructor Name", "Average Rating"]):
         disabled=["widgets"]
     )
 
-def get_courses_overview():
-    """
-    Lấy danh sách khóa học + giảng viên + số người đăng kí + rating TB.
-    Trả về DataFrame có cột 'Total Learners'.
-    """
-    conn = connect_db()
-    cursor = conn.cursor()
-    try:
-        cursor.execute("""
-            SELECT
-                c.CourseID,
-                c.CourseName,
-                i.InstructorID,
-                i.InstructorName,
-                IFNULL(enr.TotalLearners, 0) AS total_learners,
-                IFNULL(AVG(e.Rating), 0)    AS avg_rating
-            FROM  Courses            AS c
-            LEFT JOIN Instructors    AS i   ON i.InstructorID = c.InstructorID
-            LEFT JOIN Enrollments    AS e   ON e.CourseID = c.CourseID
-
-            /* Đếm người đăng kí */
-            LEFT JOIN (
-                SELECT  CourseID,
-                        COUNT(*) AS TotalLearners
-                FROM    Enrollments
-                GROUP BY CourseID
-            ) AS enr ON enr.CourseID = c.CourseID
-        """)
-        data = cursor.fetchall()
-        cols = ["CourseID", "Course Name",
-                "Instructor ID", "Instructor Name",
-                "Total Learners", "Average Rating"]
-        df = pd.DataFrame(data, columns=cols)
-        return df.fillna({"Average Rating": 0.0, "Total Learners": 0})
-    except Exception as e:
-        st.error(f"Error fetching courses: {e}")
-        return pd.DataFrame()
-    finally:
-        cursor.close()
-        conn.close()
-
-
-
 # ═══════════════ FUNCTIONS FOR INSTRUCTORS ════════════════
 def get_instructed_courses(instructor_id=st.session_state.id):
     conn = connect_db()

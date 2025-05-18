@@ -1,14 +1,15 @@
 import streamlit as st
-from style.ui import Visual
-from services.api.db.auth import load_cookies
-from services.api.courses import get_instructed_courses, instructed_courses_list
-
 st.set_page_config(
     page_title="Courses",
     page_icon="✍️",
     layout="wide",
     initial_sidebar_state="collapsed",
 )
+from style.ui import Visual
+from services.api.db.auth import load_cookies
+from services.api.courses import get_instructed_courses, instructed_courses_list
+
+
 
 load_cookies()
 Visual.initial()

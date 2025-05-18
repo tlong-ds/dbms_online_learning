@@ -1,13 +1,14 @@
 import streamlit as st
-from style.ui import Visual
-from services.api.notebook import get_notebooks, notebook_list, create, edit
-
 st.set_page_config(
     page_title="Notebooks",
     page_icon="📔",
     layout="wide",
     initial_sidebar_state="collapsed",
 )
+from style.ui import Visual
+from services.api.notebook import get_notebooks, notebook_list, create, edit
+
+
 
 Visual.initial()
 
@@ -38,7 +39,7 @@ def show_notebook_page():
     
     if st.session_state.note == "list":
         notebook_list(df)
-        if col4.button("Create", type="primary"):
+        if col4.button("Create"):
             st.session_state.note = "create"
             st.rerun()
     
@@ -49,7 +50,7 @@ def show_notebook_page():
         if col1.button("Cancel"):
             st.session_state.note = "view"
             st.rerun()
-        if col4.button("Save", type="primary"):
+        if col4.button("Save"):
             edit(new_title, new_content, st.session_state.id)
             st.session_state.note = "view"
             st.rerun()
@@ -63,7 +64,7 @@ def show_notebook_page():
         if col1.button("Back"):
             st.session_state.note = "list"
             st.rerun()
-        if col4.button("Edit", type="primary"):
+        if col4.button("Edit"):
             st.session_state.note = "edit"
             st.rerun()
        

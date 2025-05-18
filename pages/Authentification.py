@@ -1,16 +1,17 @@
 import streamlit as st
-from style.ui import Visual
-import os
-from services.api.db.auth import register_user, verify_user, get_user_info
-from streamlit_extras.switch_page_button import switch_page
-import re
-
 st.set_page_config(
     page_title="Login",
     page_icon="👤",
     layout="centered",
     initial_sidebar_state="collapsed",
 )
+from style.ui import Visual
+import os
+from services.api.db.auth import register_user, verify_user, get_user_info
+from streamlit_extras.switch_page_button import switch_page
+import re
+
+
 
 Visual.initial()
 

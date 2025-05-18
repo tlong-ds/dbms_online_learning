@@ -1,8 +1,4 @@
 import streamlit as st
-from style.ui import Visual
-from services.api.db.auth import load_cookies
-from services.api.courses import connect_db
-
 # --- PAGE SETUP ---
 st.set_page_config(
     page_title="About Us – The Learning House",
@@ -10,6 +6,11 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="collapsed",
 )
+from style.ui import Visual
+from services.api.db.auth import load_cookies
+from services.api.courses import connect_db
+
+
 load_cookies()
 Visual.initial()
 
@@ -64,7 +65,7 @@ st.markdown(
     Yet existing platforms fall short:
     - **YouTube**: lacks structured curricula, clear learning paths, and interactive support.  
     - **Traditional e-learning sites**: often restrict content to specific grades or fields (e.g., high school).  
-    - **Instructors** struggle** to publish, monetize, and reach eager audiences due to opaque onboarding, inconsistent formats, and unclear revenue sharing.
+    - **Instructors struggle**: to publish, monetize, and reach eager audiences due to opaque onboarding, inconsistent formats, and unclear revenue sharing.
     """,
     unsafe_allow_html=True
 )

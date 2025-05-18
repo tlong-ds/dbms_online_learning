@@ -1,15 +1,17 @@
 import streamlit as st
+st.set_page_config(
+    page_title="Chat bot",
+    page_icon="👤",
+    layout="wide",
+    initial_sidebar_state="collapsed",
+)
 from style.ui import Visual
 from services.api.db.auth import load_cookies
 import toml
 import os
 from services.api.chatbot.core import get_chat_response
 from services.api.chatbot.retrieval import sync_courses_to_qdrant, reset_qdrant_collection, sync_lectures_to_qdrant
-st.set_page_config(
-    page_title="Chat bot",
-    layout="wide",
-    initial_sidebar_state="collapsed",
-)
+
 
 
 load_cookies()

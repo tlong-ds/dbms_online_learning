@@ -1,26 +1,29 @@
-import re
 import streamlit as st
-from style.ui import Visual
-from services.api.db.auth import load_cookies
-from services.api.courses import lecture_list, file_exists, get_quiz, update_score
-from services.api.lecture_display import get_lecture_data
-from services.api.chatbot.core import get_chat_response_lecture
-# --- SETUP ---
 st.set_page_config(
     page_title="Lecture & Assignment",
     page_icon="📖",
     layout="wide",
     initial_sidebar_state="collapsed",
 )
+from style.ui import Visual
+from services.api.db.auth import load_cookies
+from services.api.courses import lecture_list, file_exists, get_quiz, update_score
+from services.api.lecture_display import get_lecture_data
+from services.api.chatbot.core import get_chat_response_lecture
+from streamlit_extras.switch_page_button import switch_page
+
+# --- SETUP ---
+
 
 load_cookies()
 Visual.initial()
 
 # --- READ QUERY PARAMS ---
 params = st.query_params
+if "lecture_id" not in st.session_state:
+    switch_page(f"{st.session_state.role}_Courses")
 
-
-lecture_id = int(params.get("lecture_id"))
+lecture_id = int(params.get("lecture_id", st.session_state.lecture_id))
 lec_detail = get_lecture_data(lecture_id)
 if lec_detail:
     course_id = lec_detail.get("CourseID", 0)
@@ -42,19 +45,15 @@ if "lec_idx" not in st.session_state:
     else:
         st.session_state.lec_idx = 0
 
-st.markdown("---")
-st.subheader("AI Teacher Assistant")
-with st.form(key="chat_form"):
-    user_input = st.text_input("Ask anything about this lecture...", key="chat_input")
-    submit = st.form_submit_button("Send")
+@st.dialog("AI Teacher Assistant")
+def ask_assistant():
+  with st.form(key="chat_form"):
+      user_input = st.text_input("Ask anything about this lecture...", key="chat_input")
+      submit = st.form_submit_button("Send")
 
-if submit and user_input:
-    try:
-        answer = get_chat_response_lecture(user_input, lecture_id)
-        st.markdown("**AI Answer:**")
-        st.success(answer)
-    except Exception as e:
-        st.error(f"Failed to get response: {e}")
+  if submit and user_input:
+      try:
+          answer = get_chat_response_lecture(user_input, lecture_id)
 
 # --- LAYOUT: NAV + CONTENT ---
 col1, col2, col3 = st.columns([1.5, 0.5, 9])
@@ -79,7 +78,8 @@ with col3:
     course_id = lecture["CourseID"]
     if st.session_state.view_mode == "lecture":
         if lecture:
-            st.markdown(f"# {lecture['Title']}")
+            top_cols = st.columns([16, 2])
+            top_cols[0].markdown(f"# {lecture['Title']}")
             st.write(lecture['Description'])
             # Video
             video_path = f"videos/cid{course_id}/lid{lec_id}/vid_lecture.mp4"
@@ -90,16 +90,21 @@ with col3:
             st.markdown("---")
             st.markdown(f"## Content")
             st.markdown(lecture["Content"], unsafe_allow_html=True)
+            if top_cols[1].button("Assistant"):
+                ask_assistant()
         else:
             st.error("Unable to load lecture content.")
     else:
         quiz = get_quiz(lec_id)
-        st.header(f"Assignment {st.session_state.lec_idx + 1}: {quiz['title']}")
-        st.write(quiz["description"])
-        
-        user_answers = {}
-        
-        if quiz["questions"]:
+        if not quiz:
+            st.warning("No quiz data found for this lecture.")
+            st.stop()
+        else:
+            st.header(f"Assignment {st.session_state.lec_idx + 1}: {quiz['title']}")
+            st.write(quiz["description"])
+            
+            user_answers = {}
+       
             st.write("### Questions")
             for idx, question_id in enumerate(quiz["questions"].keys(), start=1):
                 q_obj = quiz["questions"][question_id]
@@ -122,7 +127,6 @@ with col3:
                 st.success(f"Your score: {int(score)}/{100}")
                 update_score(st.session_state.id, course_id, lec_id, score)
 
-        else:
-            st.write("No questions available.")
+        
         
 

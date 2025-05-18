@@ -1,6 +1,12 @@
-import os
 import streamlit as st
+# --- PAGE SETUP ---
+st.set_page_config(
+    page_title="Course Preview",
+    layout="wide",
+    initial_sidebar_state="collapsed",
+)
 import json
+import os
 from style.ui import Visual
 from services.api.db.auth import load_cookies
 from services.api.courses import (
@@ -20,13 +26,9 @@ from services.api.courses import (
 )
 from streamlit_extras.switch_page_button import switch_page
 from urllib.parse import urlencode
+import webbrowser
 
-# --- PAGE SETUP ---
-st.set_page_config(
-    page_title="Course Preview",
-    layout="wide",
-    initial_sidebar_state="collapsed",
-)
+
 load_cookies()
 Visual.initial()
 
@@ -143,9 +145,10 @@ if st.session_state.role == "Learner":
             enroll(course_id)
             st.rerun()
     else:
+        temp_lecture = get_lectures(course_id=course_id)
         if cols[2].button("Go To Course"):
-            redirect = "/Course_Content?" + urlencode({"course_id": course_id})
-            #st.experimental_set_query_params(redirect=redirect)
+            st.session_state.lecture_id = temp_lecture[0]["id"]
+            switch_page("Lecture_Preview")
    
     # --- DESCRIPTION ---
     course_desc = get_course_description(course_id)
@@ -168,12 +171,24 @@ if st.session_state.role == "Learner":
     # --- LECTURES ---
     lectures = get_lectures(course_id)
     st.markdown(f"## Lectures — {len(lectures)} lecture{'s' if len(lectures)>1 else ''}")
-    for lec in lectures:
-        link = "/Lecture_Preview?" + urlencode({"lecture_id": lec['id']})
-        st.markdown(f"[{lec['title']}]({link})")
-        if lec.get("description"):
-            st.markdown(f"  - {lec['description']}")
-    st.divider()
+    enrolled_date = get_enrollment_date(course_id=course_id)
+    if enrolled_date:
+        for lec in lectures:
+            link = "/Lecture_Preview?" + urlencode({"lecture_id": lec['id']})
+            st.markdown(f"[{lec['title']}]({link})")
+            if lec.get("description"):
+                st.markdown(f"  - {lec['description']}")
+        st.divider()
+
+    else:
+        for lec in lectures:
+            st.markdown(lec['title'])
+            if lec.get("description"):
+                st.markdown(f"  - {lec['description']}")
+        st.divider()
+
+
+    
 
 @st.dialog("Create New Lecture")
 def create_lecture_dialog(course_id=course_id):
