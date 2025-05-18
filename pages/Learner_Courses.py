@@ -110,15 +110,15 @@ def render_cards(df_subset: pd.DataFrame, cards_per_row: int):
             # Wrap in card-container and use flexbox to align content at top
             html = f"""
             <div class="card-container">
-              <a href=\"{href}\" class="card" style="display:flex;flex-direction:column;justify-content:flex-start;height:100%;text-decoration:none;">
-                <div class="card-body" style="flex:1;display:flex;flex-direction:column;justify-content:flex-start;padding:0.5rem;">
-                  <div style="font-size:1.4rem;font-weight:600;margin:0;">{row['Course Name']}</div>
-                  <div style="font-size:0.9rem;color:#888888;margin:0.25rem 0;">{row['Instructor Name']}</div>
-                  <div style="margin-top:auto;display:flex;justify-content:space-between;align-items:center;font-size:0.9rem;">
-                    <span>{row.get('EnrolledCount', rev_cnt)} enrolled</span>
-                    <span>{avg_rat:.1f} ⭐️</span>
-                  </div>
+              <a href="{href}" class="card" style="display:flex;flex-direction:column;justify-content:flex-start;height:100%;text-decoration:none;">
+              <div class="card-body" style="flex:1;display:flex;flex-direction:column;justify-content:flex-start;padding:0.5rem;">
+                <div style="font-size:1.4rem;font-weight:600;margin:0;">{row['Course Name']}</div>
+                <div style="font-size:0.9rem;color:#888888;margin:0.25rem 0;">{row['Instructor Name']}</div>
+                <div style="margin-top:auto;display:flex;justify-content:space-between;align-items:center;font-size:0.9rem;">
+                <span>{row.get('EnrolledCount', rev_cnt)} enrolled</span>
+                <span>{avg_rat:.1f} ⭐️</span>
                 </div>
+              </div>
               </a>
             </div>
             """

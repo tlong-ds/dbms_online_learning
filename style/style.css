@@ -2,12 +2,12 @@
 
 @font-face {
     font-family: "SF-Pro-Display-Regular";
-    src: url('./fonts/SF-Pro-Display-Medium.otf') format('otf');
+    src: url('./fonts/SF-Pro-Display-Medium.otf') format('opentype');
 }
 
 @font-face {
     font-family: "SF-Pro-Display-Bold";
-    src: url('./fonts/SF-Pro-Display-Bold.otf') format('otf');
+    src: url('./fonts/SF-Pro-Display-Bold.otf') format('opentype');
 }
 
 /* Font Customization */
@@ -57,15 +57,72 @@ h4 {
 /* Button Customization */
 
 .stButton > button {
+    font-family: 'SF-Pro-Display-Bold', sans-serif !important;
     width: 100%;
     height: 40px;
     margin: 5px 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 16px;
-    border-radius: 5px;
+    position: relative;
+    padding: 10px 20px;
+    border-radius: 7px;
+    border: 1px solid rgb(61, 106, 255, 0.5);
+    font-size: 14px;
+    background: transparent;
+    overflow: hidden;
+    box-shadow: 0 0 0 0 transparent;
+    transition: all 0.2s ease-in;
 }
+
+.stButton > button:hover {
+    background: rgb(153, 204, 255);
+    box-shadow: 0 0 30px 5px rgba(102, 178, 255, 0.815);
+    transition: all 0.2s ease-out;
+    color: rgb(255,255,255);
+    border: 1px solid rgb(255, 255, 255);
+}
+
+.stButton > button:hover::before {
+    animation: sh02 0.5s 0s linear;
+}
+
+.stButton > button::before {
+    content: '';
+    display: block;
+    width: 0px;
+    height: 86%;
+    position: absolute;
+    top: 7%;
+    left: 0%;
+    opacity: 0;
+    background: #fff;
+    box-shadow: 0 0 50px 30px #fff;
+    transform: skewX(-20deg);
+}
+
+@keyframes sh02 {
+  from {
+    opacity: 0;
+    left: 0%;
+  }
+
+  50% {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+    left: 100%;
+  }
+}
+
+.stButton > button:active {
+  box-shadow: 0 0 0 0 transparent;
+  transition: box-shadow 0.2s ease-in;
+}
+
+
 
 /* Card */
 .card-container {
@@ -108,7 +165,20 @@ h4 {
     padding-top: 10px;
 }
 
+
+
 /* Sidebar Customization */
+
+/* Customize sidebar background */
+section[data-testid="stSidebar"] {
+    background-color: rgb(0, 102, 204, 0.2) !important;  /* Replace with your preferred color */
+}
+
+/* Optional: tweak header or widget text color in sidebar */
+section[data-testid="stSidebar"] .css-1v0mbdj,  /* default text */
+section[data-testid="stSidebar"] .css-10trblm {  /* header */
+    color: white !important;
+}
 
 /* Hide default sidebar navigation */
 [data-testid="stSidebarNav"] {display: none !important;}
@@ -123,3 +193,8 @@ section[data-testid="stSidebar"] .css-1d391kg {display: none}
 /* Additional selectors to ensure navigation is hidden */
 .css-1544g2n.e1fqkh3o4 {display: none !important;}
 .css-1adrfps.e1fqkh3o4 {display: none !important;}
+
+/* Hide Streamlit's top-right menu (Deploy, View app, Settings) */
+header[data-testid="stHeader"] {
+    visibility: hidden;
+}

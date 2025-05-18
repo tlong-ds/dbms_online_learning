@@ -82,12 +82,15 @@ with col3:
             st.error("Unable to load lecture content.")
     else:
         quiz = get_quiz(lec_id)
-        st.header(f"Assignment {st.session_state.lec_idx + 1}: {quiz['title']}")
-        st.write(quiz["description"])
-        
-        user_answers = {}
-        
-        if quiz["questions"]:
+        if not quiz:
+            st.warning("No quiz data found for this lecture.")
+            st.stop()
+        else:
+            st.header(f"Assignment {st.session_state.lec_idx + 1}: {quiz['title']}")
+            st.write(quiz["description"])
+            
+            user_answers = {}
+       
             st.write("### Questions")
             for idx, question_id in enumerate(quiz["questions"].keys(), start=1):
                 q_obj = quiz["questions"][question_id]
@@ -110,8 +113,7 @@ with col3:
                 st.success(f"Your score: {int(score)}/{100}")
                 update_score(st.session_state.id, course_id, lec_id, score)
 
-        else:
-            st.write("No questions available.")
+        
         
         
         
