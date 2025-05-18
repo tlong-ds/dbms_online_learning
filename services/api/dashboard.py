@@ -77,7 +77,7 @@ def show_dashboard_learner():
     c3.metric("Completion Rate", rate)
     c4.metric("Lectures Passed", passed)
 
-    if not st.session_state.view:
+    if "view" not in st.session_state:
         st.session_state.view = 'Statistics'
 
     col = st.columns([1,1,12])

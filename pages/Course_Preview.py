@@ -144,8 +144,9 @@ if st.session_state.role == "Learner":
             st.rerun()
     else:
         if cols[2].button("Go To Course"):
-            redirect = "/Course_Content?" + urlencode({"course_id": course_id})
-            #st.experimental_set_query_params(redirect=redirect)
+            temp_lecture = get_lectures(course_id= course_id)
+            redirect = "/Lecture_Preview?" + urlencode({"lecture_id": temp_lecture[0]["id"]})
+            #st.switch_page(redirect)
    
     # --- DESCRIPTION ---
     course_desc = get_course_description(course_id)
@@ -168,12 +169,24 @@ if st.session_state.role == "Learner":
     # --- LECTURES ---
     lectures = get_lectures(course_id)
     st.markdown(f"## Lectures — {len(lectures)} lecture{'s' if len(lectures)>1 else ''}")
-    for lec in lectures:
-        link = "/Lecture_Preview?" + urlencode({"lecture_id": lec['id']})
-        st.markdown(f"[{lec['title']}]({link})")
-        if lec.get("description"):
-            st.markdown(f"  - {lec['description']}")
-    st.divider()
+    enrolled_date = get_enrollment_date(course_id=course_id)
+    if enrolled_date:
+        for lec in lectures:
+            link = "/Lecture_Preview?" + urlencode({"lecture_id": lec['id']})
+            st.markdown(f"[{lec['title']}]({link})")
+            if lec.get("description"):
+                st.markdown(f"  - {lec['description']}")
+        st.divider()
+
+    else:
+        for lec in lectures:
+            st.markdown(lec['title'])
+            if lec.get("description"):
+                st.markdown(f"  - {lec['description']}")
+        st.divider()
+
+
+    
 
 @st.dialog("Create New Lecture")
 def create_lecture_dialog(course_id=course_id):
