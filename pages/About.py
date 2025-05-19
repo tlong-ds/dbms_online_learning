@@ -147,10 +147,10 @@ team = [
 ]
 
 image_paths = [
-    "D:/Minh/Tài liệu học tập (DSEB)/Kì 4/Database Management Systems/Final Project/dbms_online_learning/logo/ava1.webp",
-    "D:/Minh/Tài liệu học tập (DSEB)/Kì 4/Database Management Systems/Final Project/dbms_online_learning/logo/ava2.webp",
-    "D:/Minh/Tài liệu học tập (DSEB)/Kì 4/Database Management Systems/Final Project/dbms_online_learning/logo/ava3.webp",
-    "D:/Minh/Tài liệu học tập (DSEB)/Kì 4/Database Management Systems/Final Project/dbms_online_learning/logo/ava4.webp",
+    "./logo/ava1.webp",
+    "./logo/ava2.webp",
+    "./logo/ava3.webp",
+    "./logo/ava4.webp",
 ]
 
 
