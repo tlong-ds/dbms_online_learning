@@ -208,56 +208,42 @@ def create_lecture_dialog(course_id=course_id):
     st.write("Number of question")
     num_questions = st.select_slider(label="number", label_visibility="collapsed", options=range(1,11))
     questions = []
-    with st.form(key="quiz_form"):
-        questions = []
-        valid = True
-        error_msg = ""
+    
+    valid = True
+    error_msg = ""
 
-        for i in range(num_questions):
-            st.write(f"Question {i + 1}")
-            question = st.text_input(label=f"question{i}", label_visibility="collapsed")
-            if not question.strip():
+    for i in range(num_questions):
+        st.write(f"Question {i + 1}")
+        question = st.text_input(label=f"question{i}", label_visibility="collapsed")
+        if not question.strip():
+            valid = False
+            error_msg = f"Question {i + 1} is missing."
+
+        answers = {}
+        for j in range(4):
+            st.write(f"Option {j + 1}")
+            answer = st.text_input(label=f"q{i}a{j}", label_visibility="collapsed")
+            if not answer.strip():
                 valid = False
-                error_msg = f"Question {i + 1} is missing."
+                error_msg = f"Option {j + 1} for question {i + 1} is missing."
+            answers[f"Option {j + 1}"] = answer
 
-            answers = {}
-            for j in range(4):
-                st.write(f"Option {j + 1}")
-                answer = st.text_input(label=f"q{i}a{j}", label_visibility="collapsed")
-                if not answer.strip():
-                    valid = False
-                    error_msg = f"Option {j + 1} for question {i + 1} is missing."
-                answers[f"Option {j + 1}"] = answer
-
-            st.write(f"Correct Answer of question {i + 1}")
-            correct_answer = st.selectbox(label=f"correct{i}", options=["Option 1", "Option 2", "Option 3", "Option 4"], label_visibility="collapsed")
-            if not correct_answer:
-                valid = False
-                error_msg = f"Correct answer for question {i + 1} is not selected."
-            else:
-                answers["Correct"] = correct_answer
-
-            questions.append({"question": question, "answers": answers})
-
-        submit_quiz = st.form_submit_button("Save Quiz")
-        if submit_quiz:
-            if not valid:
-                st.error(error_msg)
-            else:
-                st.success("Quiz submitted successfully!")
-                # proceed with saving or further processing
-            
+        st.write(f"Correct Answer of question {i + 1}")
+        correct_answer = st.selectbox(label=f"correct{i}", options=["Option 1", "Option 2", "Option 3", "Option 4"], label_visibility="collapsed")
+        if not correct_answer:
+            valid = False
+            error_msg = f"Correct answer for question {i + 1} is not selected."
+        else:
+            answers["Correct"] = correct_answer
+        questions.append({"question": question, "answers": answers})
 
     if st.button("Submit"):
-        if not submit_quiz:
-            st.error("Please fill in the quiz details.")
-        else:
-            add_lecture(course_id, title, description, content)
-            lecture_id = get_lecture_id(course_id, title)
-            if video is not None:
-                upload_video(course_id, lecture_id, video)
-            print(questions)
-            create_quiz(lecture_id, quiz_title, quiz_description, questions)
+        add_lecture(course_id, title, description, content)
+        lecture_id = get_lecture_id(course_id, title)
+        if video is not None:
+            upload_video(course_id, lecture_id, video)
+        print(questions)
+        create_quiz(lecture_id, quiz_title, quiz_description, questions)
 
 
 

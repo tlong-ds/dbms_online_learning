@@ -16,7 +16,7 @@ import os
 load_cookies()
 Visual.initial()
 
-if not st.session_state.view:
+if "view" not in st.session_state:
     st.session_state.view = "info"
 
 def show_settings():

@@ -1,5 +1,5 @@
 import streamlit as st
-from services.api.db.auth import load_cookies
+from services.api.chatbot.retrieval import sync_lectures_to_qdrant
 import json
 import os
 from dotenv import load_dotenv
@@ -26,8 +26,6 @@ s3 = boto3.client('s3',
     )
 
 def connect_db():
-    if "id" not in st.session_state:
-        load_cookies()
     return pymysql.connect(
         host=MYSQL_HOST,
         user=MYSQL_USER,
@@ -218,14 +216,15 @@ def learner_list(course_id, instructor_id = st.session_state.id):
         SELECT 
             enr.LearnerID,
             l.LearnerName,
-            enr.EnrollmentDate
+            enr.EnrollmentDate,
+            enr.Percentage
         FROM Enrollments enr 
         LEFT JOIN Learners l ON enr.LearnerID = l.LearnerID
         LEFT JOIN Courses c ON enr.CourseID = c.CourseID
         WHERE enr.CourseID = %s AND c.InstructorID = %s
         """, (course_id, instructor_id))
         data = cursor.fetchall()
-        columns = ["LearnerID", "Learner Name", "EnrollmentDate"] 
+        columns = ["LearnerID", "Learner Name", "EnrollmentDate", "Percentage"] 
         df = pd.DataFrame(data, columns = columns)
         return df
     except Exception as e:
@@ -289,6 +288,7 @@ def add_lecture(course_id, title, description, content):
         )
         conn.commit()
         st.success(f"Lecture '{title}' added successfully!")
+        sync_lectures_to_qdrant()
         return True
     except Exception as e:
         conn.rollback()
@@ -445,10 +445,8 @@ def update_score(learner_id, course_id, lecture_id, score):
     cursor = conn.cursor()
     try:
         cursor.execute(
-            """UPDATE LectureResults
-                SET Score = %s, Date = NOW()
-                WHERE LearnerID = %s AND CourseID = %s AND LectureID = %s""",
-            (score, learner_id, course_id, lecture_id))
+            """CALL sp_update_lecture_result(%s, %s, %s, %s)""",
+            (learner_id, course_id, lecture_id, score))
         conn.commit()
         st.success("Score updated successfully!")
     except Exception as e:
