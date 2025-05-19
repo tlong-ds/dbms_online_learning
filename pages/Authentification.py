@@ -96,6 +96,13 @@ def show_auth():
 
 
     st.markdown("---")
-    
+    st.markdown(
+    """
+    <div style="text-align:center; color:gray; font-size:0.8rem;">
+    © 2025 The Learning House. All rights reserved.
+    </div>
+    """,
+    unsafe_allow_html=True
+    )
 
 show_auth()
