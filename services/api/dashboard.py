@@ -387,10 +387,10 @@ def show_dashboard_instructor():
                          .reindex(full_idx, fill_value=0)
                          .rename("New Enrollments")
             )
-            cum_counts = new_counts.cumsum().rename("Cummulative Enrollments")
+            cum_counts = new_counts.cumsum().rename("Cumulative Enrollments")
 
             # Charts in tabs
-            tab1, tab2 = st.tabs(["New Enrollments", "Cummulative Enrollments"])
+            tab1, tab2 = st.tabs(["New Enrollments", "Cumulative Enrollments"])
             with tab1:
                 df_new = make_period_df(new_counts, freq_label)
                 chart1 = (
