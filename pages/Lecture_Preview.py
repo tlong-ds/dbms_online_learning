@@ -5,17 +5,18 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="collapsed",
 )
-from style.ui import Visual
 from services.api.db.auth import load_cookies
-from services.api.courses import lecture_list, file_exists, get_quiz, update_score
-from services.api.lecture_display import get_lecture_data
+load_cookies()
+from streamlit_extras.switch_page_button import switch_page
+if "login" not in st.session_state:
+    switch_page("Authentification")
+
+from style.ui import Visual
+from services.api.lectures import get_lecture_data, lecture_list, file_exists, get_quiz, update_score
 from services.api.chatbot.core import get_chat_response_lecture
 from streamlit_extras.switch_page_button import switch_page
 
 # --- SETUP ---
-
-
-load_cookies()
 Visual.initial()
 
 # --- READ QUERY PARAMS ---

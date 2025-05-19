@@ -5,37 +5,36 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="collapsed",
 )
-
+from services.api.db.auth import load_cookies
+load_cookies()
+from streamlit_extras.switch_page_button import switch_page
+if "login" not in st.session_state:
+    switch_page("Authentification")
 from style.ui import Visual
 from services.api.settings import info, security, appearance
-from services.api.db.auth import load_cookies
-import toml
-import os
 
-
-load_cookies()
 Visual.initial()
 
-if "view" not in st.session_state:
-    st.session_state.view = "info"
+if "setting_view" not in st.session_state:
+    st.session_state.setting_view = "info"
 
 def show_settings():
     col1, col2 = st.columns([1, 4])
     with col1:
         st.title("Settings")
         if st.button("Personal Information"):
-            st.session_state.view = "info"
+            st.session_state.setting_view = "info"
         if st.button("Security"):
-            st.session_state.view = "security"
+            st.session_state.setting_view = "security"
         if st.button("Appearance"):
-            st.session_state.view = "appearance"    
+            st.session_state.setting_view = "appearance"    
         
     with col2:
-        if st.session_state.view == "info":
+        if st.session_state.setting_view == "info":
             info()
-        if st.session_state.view == "security":
+        if st.session_state.setting_view == "security":
             security()
-        if st.session_state.view == "appearance":
+        if st.session_state.setting_view == "appearance":
             appearance()
 
 show_settings()

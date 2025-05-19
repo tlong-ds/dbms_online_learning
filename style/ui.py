@@ -10,7 +10,6 @@ class Visual:
     CONFIG = toml.load(".streamlit/config.toml")
     FOLDER = "style"
     THEME = CONFIG["theme"]["base"] 
-    
     CSS = "style.css"
     
     @staticmethod
@@ -49,32 +48,26 @@ class Visual:
 
             if st.session_state.login:
                 # User Information
-                st.markdown(f'<div style="font-size: 23px; font-weight: bold;">Welcome, {st.session_state.name}!</div>', unsafe_allow_html=True)
+                st.markdown(f'<div style="font-size: 20px; font-weight: bold;">Welcome, {st.session_state.name}!</div>', unsafe_allow_html=True)
                 st.markdown(f'<div style="font-size: 18px; ">Role: {st.session_state.role}</div>', unsafe_allow_html=True)
                 st.divider()
+                if st.button("Courses"):
+                        switch_page("Courses") 
+                if st.button("Dashboard"):
+                    switch_page("Dashboard")
                 # Learner Navigation
                 if st.session_state.role == "Learner":
-                    if st.button("Courses"):
-                        switch_page("Learner Courses") 
-                    if st.button("Dashboard"):
-                        switch_page("Learner Dashboard")
                     if st.button("Notebook"):
-                        switch_page("Learner Notebook")
+                        switch_page("Notebook")
                     if st.button("Focus Timer"):
-                        switch_page("Learner Timer")
+                        switch_page("Timer")
                     if st.button("EduMate"):
                         switch_page("Chatbot")
-                # Instructor
-                if st.session_state.role == "Instructor":
-                    if st.button("Dashboard"):
-                        switch_page("Instructor Dashboard")
-                    if st.button("Courses"):
-                        switch_page("Instructor Courses") 
                 st.divider()
                 if st.button("Settings"):
                     switch_page("Settings")
-                if st.button("About us"):
-                    switch_page("Aboutus")
+                if st.button("About Us"):
+                    switch_page("About")
                 st.divider()
                 
                 if st.button("Log out"):

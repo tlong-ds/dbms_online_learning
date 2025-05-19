@@ -5,16 +5,17 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="collapsed",
 )
-from style.ui import Visual
 from services.api.db.auth import load_cookies
-import toml
-import os
+load_cookies()
+from streamlit_extras.switch_page_button import switch_page
+if "login" not in st.session_state:
+    switch_page("Authentification")
+
+
+from style.ui import Visual
 from services.api.chatbot.core import get_chat_response
 from services.api.chatbot.retrieval import sync_courses_to_qdrant, reset_qdrant_collection, sync_lectures_to_qdrant
 
-
-
-load_cookies()
 Visual.initial()
 
 col_left, col_right = st.columns([20, 1])
