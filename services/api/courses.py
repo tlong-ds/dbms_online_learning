@@ -259,16 +259,18 @@ def lecture_list(course_id):
     try:
         cursor.execute("""
         SELECT
-            LectureID,
-            CourseID,            
-            Title,
-            Description,
-            Content
-        from Lectures 
-        WHERE CourseID = %s
+            l.LectureID,
+            l.CourseID, 
+            c.CourseName,          
+            l.Title,
+            l.Description,
+            l.Content
+        from Lectures l
+        LEFT JOIN Courses c ON c.CourseID = l.CourseID 
+        WHERE l.CourseID = %s
         """, (course_id))
         data = cursor.fetchall()
-        columns = ["LectureID", "CourseID", "Lecture Title", "Description", "Content"] 
+        columns = ["LectureID", "CourseID", "Course Name", "Lecture Title", "Description", "Content"] 
         df = pd.DataFrame(data, columns = columns)
         return df
     except Exception as e:

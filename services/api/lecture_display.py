@@ -33,8 +33,18 @@ def get_lecture_data(lecture_id):
     try:
         # Lấy đúng các cột cần thiết, đặt LectureID đúng chính tả
         cursor.execute(
-            "SELECT LectureID, Title, Description, Content, CourseID "
-            "FROM Lectures WHERE LectureID = %s",
+            """
+               SELECT
+                    l.LectureID,      
+                    l.Title,
+                    l.Description,
+                    l.Content,
+                    l.CourseID, 
+                    c.CourseName   
+                FROM Lectures l
+                LEFT JOIN Courses c ON c.CourseID = l.CourseID 
+                WHERE l.LectureID = %s
+            """,
             (lecture_id,)
         )
         row = cursor.fetchone()
@@ -42,12 +52,13 @@ def get_lecture_data(lecture_id):
             return None
 
         # row = (LectureID, Title, Description, Content, CourseID)
-        _, title, description, content, course_id = row
+        _, title, description, content, course_id, course_name = row
         return {
             'Title': title,
             'Description': description,
             'Content': content,
-            'CourseID': course_id
+            'CourseID': course_id,
+            'CourseName': course_name
         }
     except Exception as e:
         st.error(f"Error fetching lecture data: {e}")

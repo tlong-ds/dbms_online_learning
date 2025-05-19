@@ -27,7 +27,7 @@ lecture_id = int(params.get("lecture_id", st.session_state.lecture_id))
 lec_detail = get_lecture_data(lecture_id)
 if lec_detail:
     course_id = lec_detail.get("CourseID", 0)
-    
+    course_name = lec_detail.get("CourseName", None)
 # --- FETCH LECTURES FOR THIS COURSE ---
 lectures_df = lecture_list(course_id)
 n_lec = len(lectures_df)
@@ -50,7 +50,6 @@ if "ask_history" not in st.session_state:
 @st.dialog("Ask EduMate")
 def ask_assistant():
     user_input = st.chat_input("Ask anything about this lecture...", key="chat_input")
-
     if user_input:
         try:
             st.session_state.ask_history.append({"role": "user", "content": user_input})
@@ -67,8 +66,8 @@ def ask_assistant():
 col1, col2, col3 = st.columns([1.5, 0.5, 9])
 
 with col1:
-    st.title("Navigation")
-    st.subheader("Lectures")
+    st.markdown(f"### {course_name}", unsafe_allow_html=True)
+    st.markdown(f"**Navigation**", unsafe_allow_html=True)
     for i, row in lectures_df.iterrows():
         if st.button(f"Lecture {i+1}", key=f"lec_{i}"):
             st.session_state.view_mode = "lecture"
