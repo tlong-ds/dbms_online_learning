@@ -16,7 +16,9 @@ import re
 Visual.initial()
 
 def show_auth():
-    
+    top_cols = st.columns([12,4,12])
+    with top_cols[1]:
+        st.image(f"./style/{st.session_state.theme}_logo.webp", use_column_width=True)
     # --- Header ---
     st.markdown('<div class="auth-title">The Learning House</div>', unsafe_allow_html=True)
     st.markdown('<div class="auth-sub">The Best Learning Platform for Learners and Instructors!</div>', unsafe_allow_html=True)
@@ -39,7 +41,7 @@ def show_auth():
                         st.success(f"Welcome back, {username}!")
                         st.session_state.login = True
                         get_user_info(username, role)
-                        switch_page(f"{role}_Courses")
+                        switch_page(f"Courses")
                         
                     else:
                         st.error("Wrong username or password.")
@@ -94,6 +96,13 @@ def show_auth():
 
 
     st.markdown("---")
-    
+    st.markdown(
+    """
+    <div style="text-align:center; color:gray; font-size:0.8rem;">
+    © 2025 The Learning House. All rights reserved.
+    </div>
+    """,
+    unsafe_allow_html=True
+    )
 
 show_auth()

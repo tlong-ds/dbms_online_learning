@@ -2,34 +2,40 @@ import streamlit as st
 # --- PAGE SETUP ---
 st.set_page_config(
     page_title="Course Preview",
+    page_icon="✍️",
     layout="wide",
     initial_sidebar_state="collapsed",
 )
+from services.api.db.auth import load_cookies
+load_cookies()
+from streamlit_extras.switch_page_button import switch_page
+if "login" not in st.session_state:
+    switch_page("Authentification")
+
 import json
 import os
 from style.ui import Visual
-from services.api.db.auth import load_cookies
 from services.api.courses import (
   get_enrollment_date, 
   enroll, 
   connect_db,
   get_total_learners,
-  get_lectures,
-  get_lecture_id,
   get_course_description,
-  file_exists,
-  learner_list, 
-  lecture_list, 
-  add_lecture,
-  upload_video,
-  create_quiz
+  learner_list
+)
+from services.api.lectures import (
+    get_lectures,
+    get_lecture_id,
+    file_exists,
+    lecture_list, 
+    add_lecture,
+    upload_video,
+    create_quiz
 )
 from streamlit_extras.switch_page_button import switch_page
 from urllib.parse import urlencode
-import webbrowser
 
 
-load_cookies()
 Visual.initial()
 
 # --- QUERY PARAMS ---

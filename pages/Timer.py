@@ -5,11 +5,14 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="collapsed",
 )
+from services.api.db.auth import load_cookies
+load_cookies()
+from streamlit_extras.switch_page_button import switch_page
+if "login" not in st.session_state:
+    switch_page("Authentification")
 from style.ui import Visual
 from services.api.timer import learn_countdown, break_countdown, timer_init
-from services.api.db.auth import load_cookies
 
-load_cookies()
 Visual.initial()
 st.session_state.setdefault("timer_state", None)
 st.session_state.setdefault("timer_name", "Default Timer")

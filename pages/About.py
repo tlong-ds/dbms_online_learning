@@ -6,12 +6,18 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="collapsed",
 )
-from style.ui import Visual
 from services.api.db.auth import load_cookies
+load_cookies()
+from streamlit_extras.switch_page_button import switch_page
+if "login" not in st.session_state:
+    switch_page("Authentification")
+
+
+from style.ui import Visual
 from services.api.courses import connect_db
 
 
-load_cookies()
+
 Visual.initial()
 
 # --- GLOBAL CSS FOR FONT SIZE ---
@@ -141,10 +147,10 @@ team = [
 ]
 
 image_paths = [
-    "D:/Minh/Tài liệu học tập (DSEB)/Kì 4/Database Management Systems/Final Project/dbms_online_learning/logo/ava1.webp",
-    "D:/Minh/Tài liệu học tập (DSEB)/Kì 4/Database Management Systems/Final Project/dbms_online_learning/logo/ava2.webp",
-    "D:/Minh/Tài liệu học tập (DSEB)/Kì 4/Database Management Systems/Final Project/dbms_online_learning/logo/ava3.webp",
-    "D:/Minh/Tài liệu học tập (DSEB)/Kì 4/Database Management Systems/Final Project/dbms_online_learning/logo/ava4.webp",
+    "./logo/ava1.webp",
+    "./logo/ava2.webp",
+    "./logo/ava3.webp",
+    "./logo/ava4.webp",
 ]
 
 
