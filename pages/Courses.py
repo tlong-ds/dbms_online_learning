@@ -167,7 +167,7 @@ if st.session_state.role == "Learner":
     
     df = sort_df(df_raw)
     with header_cols[0]:
-        st.markdown(f'<div style="font-size: 18px; color: {"#000000" if st.session_state.theme == "dark" else "#ffffff"}"> .</div>', unsafe_allow_html=True) 
+        st.markdown(f'<div style="font-size: 18px; color: {"#000000" if st.session_state.theme == "dark" else "#f7fbfe"}"> .</div>', unsafe_allow_html=True) 
         search_fragment(df)
     
     st.write("Available Courses")

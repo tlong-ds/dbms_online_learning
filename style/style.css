@@ -134,7 +134,7 @@ h4 {
     overflow: hidden;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     margin: 10px;
-    color: inherit;
+    background-color: rgb(153, 204, 255, 0.2);
     transition: box-shadow 0.3s ease;
     flex: 1;
     display: flex !important;
@@ -146,7 +146,12 @@ h4 {
     display: flex;
 }
 .card:hover {
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    box-shadow: 0 0 30px 5px rgba(102, 178, 255, 0.815);
+    transition: all 0.2s ease-out;
+    border: 1px solid rgb(255, 255, 255);
+}
+.card:hover::before {
+    animation: sh02 0.5s 0s linear;
 }
 .card-body {
     padding: 15px;
@@ -203,4 +208,8 @@ section[data-testid="stSidebar"] .css-1d391kg {display: none}
 /* Hide Streamlit's top-right menu (Deploy, View app, Settings) */
 header[data-testid="stHeader"] {
     visibility: hidden;
+}
+
+[data-testid="stAppViewContainer"] {
+    background-color: flex !important;
 }
