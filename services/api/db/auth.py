@@ -18,13 +18,16 @@ MYSQL_DB = os.getenv("MYSQL_DB")
 MYSQL_PORT = int(os.getenv("MYSQL_PORT"))
 
 def connect_db():
-    return pymysql.connect(
-        host=MYSQL_HOST,
-        user=MYSQL_USER,
-        password=MYSQL_PASSWORD,
-        database=MYSQL_DB,
-        port=MYSQL_PORT
-    )
+    try:
+        return pymysql.connect(
+            host=MYSQL_HOST,
+            user=MYSQL_USER,
+            password=MYSQL_PASSWORD,
+            database=MYSQL_DB,
+            port=MYSQL_PORT
+        )
+    except pymysql.err.OperationalError as e:
+        return None
 
 # --- password hashing ---
 
@@ -59,6 +62,8 @@ def register_user(account_name: str,
         vals.append(extra_val)
 
     conn = connect_db()
+    if conn is None:
+        return False
     cursor = conn.cursor()
     try:
         # 1) email and account name check
@@ -88,6 +93,8 @@ def register_user(account_name: str,
 
 def verify_user(username, password, role):
     conn = connect_db()
+    if conn is None:
+        return False
     cursor = conn.cursor()
     if role == "Learner":
         cursor.execute("SELECT Password FROM Learners WHERE AccountName = %s", (username,))
@@ -122,6 +129,8 @@ def load_cookies():
     
 def get_user_info(username, role):
     conn = connect_db()
+    if conn is None:
+        return False
     cursor = conn.cursor()
     if role == "Learner":
         cursor.execute("SELECT LearnerID, LearnerName, Email, PhoneNumber FROM Learners WHERE AccountName = %s", (username,))
@@ -147,6 +156,8 @@ def get_user_info(username, role):
 
 def update_user_info(username, role, name, email, extra):
     conn = connect_db()
+    if conn is None:
+        return False
     cursor = conn.cursor()
     if role == "Learner":
         cursor.execute("""
@@ -169,6 +180,8 @@ def update_password(username, old_password, role, new_password, confirmed_new_pa
     if verify_user(username, old_password, role):
         if new_password == confirmed_new_password:
             conn = connect_db()
+    if conn is None:
+        return False
             cursor = conn.cursor()
             if role == "Learner":
                 cursor.execute(
