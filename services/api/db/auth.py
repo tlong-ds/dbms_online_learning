@@ -180,8 +180,8 @@ def update_password(username, old_password, role, new_password, confirmed_new_pa
     if verify_user(username, old_password, role):
         if new_password == confirmed_new_password:
             conn = connect_db()
-    if conn is None:
-        return False
+            if conn is None:
+                return False
             cursor = conn.cursor()
             if role == "Learner":
                 cursor.execute(
