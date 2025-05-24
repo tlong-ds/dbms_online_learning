@@ -19,8 +19,7 @@ If none of the available courses match the user's demand, politely inform them t
 This is the user's question:
 {question}
 
-
-
+You must answer in the user's language.
 ---
 
 ### Response:
@@ -48,6 +47,7 @@ Now, here is the learner's question:
 
 If none of the available content seems related to the learner's question, kindly inform them that we currently do not have suitable material for this request and that their feedback has been noted for future development.
 
+You must answer in the user's language.
 ---
 
 ### Response:
@@ -67,5 +67,7 @@ Follow-Up Input:
 {question}
 
 Standalone question:
+
+You must answer in the user's language.
 """
 )
