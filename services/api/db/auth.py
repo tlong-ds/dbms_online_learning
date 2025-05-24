@@ -4,8 +4,10 @@ from dotenv import load_dotenv
 import bcrypt
 import streamlit as st
 from streamlit_cookies_manager import EncryptedCookieManager
+import streamlit.components.v1 as components
+import streamlit_js_eval as js_eval
 
-
+import requests
 cookies = EncryptedCookieManager(prefix="auth_", password=os.getenv("COOKIE_SECRET", "default_secret_key"))
 if not cookies.ready():
     st.stop()
@@ -16,6 +18,8 @@ MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD")
 MYSQL_HOST = os.getenv("MYSQL_HOST")
 MYSQL_DB = os.getenv("MYSQL_DB")
 MYSQL_PORT = int(os.getenv("MYSQL_PORT"))
+
+FASTAPI_URL = "http://0.0.0.0:8000"
 
 def connect_db():
     try:
@@ -101,29 +105,45 @@ def verify_user(username, password, role):
         data = cursor.fetchone()
         conn.close()
         if data and check_password(password, data[0]):
-            cookies["username"] = username
-            cookies["role"] = role
-            cookies.save()
-            return True
-        return False
+            # cookies["username"] = username
+            # cookies["role"] = role
+            # cookies.save()
+            st.session_state.username = username
+            st.session_state.role = role
     elif role == "Instructor":
         cursor.execute("SELECT Password FROM Instructors WHERE AccountName = %s", (username,))
         data = cursor.fetchone()
         conn.close()
         if data and check_password(password, data[0]):
-            cookies["username"] = username
-            cookies["role"] = role
-            cookies.save()
-            return True
-        return False
+            # cookies["username"] = username
+            # cookies["role"] = role
+            # cookies.save()
+            st.session_state.username = username
+            st.session_state.role = role
     
-def load_cookies():
-    if "username" not in st.session_state and cookies.get("username"):
-        username = cookies.get("username")
-        role = cookies.get("role")
-        get_user_info(username, role)
-        st.session_state.login = True
-        st.rerun()
+    
+    if "username" in st.session_state and "role" in st.session_state:
+        components.html(f"""
+            <script>
+                fetch("http://localhost:8000/set_cookie?username={st.session_state.username}&role={st.session_state.role}", {{
+                    method: "GET",
+                    credentials: "include"
+                }}).then(() => {{
+                    window.location.reload();
+                }});
+            </script>
+        """, height=0)
+        return True
+    else:
+        st.error("Invalid login credentials/")
+        return False
+# def #load_cookies():
+#     if "username" not in st.session_state and cookies.get("username"):
+#         username = cookies.get("username")
+#         role = cookies.get("role")
+#         get_user_info(username, role)
+#         st.session_state.login = True
+#         st.rerun()
 
         
     
@@ -135,9 +155,6 @@ def get_user_info(username, role):
     if role == "Learner":
         cursor.execute("SELECT LearnerID, LearnerName, Email, PhoneNumber FROM Learners WHERE AccountName = %s", (username,))
         data = cursor.fetchone()
-        
-        st.session_state.username = username
-        st.session_state.role = role
         st.session_state.id = data[0]
         st.session_state.name = data[1]
         st.session_state.email = data[2]
@@ -146,8 +163,6 @@ def get_user_info(username, role):
     elif role == "Instructor":
         cursor.execute("SELECT InstructorID, InstructorName, Email, Expertise FROM Instructors WHERE AccountName = %s", (username,))
         data = cursor.fetchone()
-        st.session_state.username = username
-        st.session_state.role = role
         st.session_state.id = data[0]
         st.session_state.name = data[1]
         st.session_state.email = data[2]
@@ -206,4 +221,71 @@ def logout_user():
     cookies["role"] = ""
     cookies.save()
     st.session_state.clear()
-    
+
+def load_from_cookies():
+    # Inject JS to extract cookie and place it in DOM
+    components.html("""
+        <script>
+            function getCookie(name) {
+                const value = `; ${document.cookie}`;
+                const parts = value.split(`; ${name}=`);
+                if (parts.length === 2) return parts.pop().split(';').shift();
+                return null;
+            }
+            
+            // Get the auth_token cookie
+            const token = getCookie('auth_token');
+            console.log('Auth token from cookie:', token);
+            
+            // Store it in a div for Streamlit to access
+            const tokenEl = window.parent.document.getElementById("token-display");
+            if (tokenEl) {
+                tokenEl.innerText = token || "No token found in cookies";
+            }
+            
+            // Also attempt the whoami request to see server response
+            fetch("http://0.0.0.0:8000/whoami", {
+                method: "GET",
+                credentials: "include",
+                headers: {
+                    "Accept": "application/json"
+                }
+            })
+            .then(res => {
+                console.log('Response status:', res.status);
+                if (!res.ok) {
+                    throw new Error(`HTTP error! Status: ${res.status}`);
+                }
+                return res.json();
+            });
+        </script>
+        <div id="debug-info"></div>
+    """, height=0)
+    # Try reading from the hidden div (may require rerun)
+    token = st.empty()
+    token_html = st.markdown("<div id='token-holder'></div>", unsafe_allow_html=True)
+    token_val = st.query_params.get("token", None)
+    print(token_val)
+
+    if not token_val and "browser_token" not in st.session_state:
+        st.warning("Waiting for browser to sync auth token...")
+        return False
+
+    token_val = st.session_state.get("browser_token", token_val)
+
+    try:
+        r = requests.get(f"{FASTAPI_URL}/whoami", cookies={"auth_token": token_val})
+        if r.status_code == 200:
+            data = r.json()
+            if isinstance(data.get("user_info"), dict):
+                info = data["user_info"]
+                st.session_state.username = info["username"]
+                st.session_state.role = info["role"]
+                st.session_state.login = True
+                get_user_info(info["username"], info["role"])
+                return True
+    except Exception as e:
+        st.error(f"Failed to verify token: {e}")
+
+    st.session_state.login = False
+    return False

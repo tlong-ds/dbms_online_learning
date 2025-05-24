@@ -1,5 +1,5 @@
 import streamlit as st
-from services.api.db.auth import load_cookies
+#from services.api.db.auth import load_cookies
 import pandas as pd
 from datetime import datetime
 import pymysql
@@ -24,7 +24,7 @@ st.session_state.setdefault("note_content", None)
 
 def connect_db():
     if "id" not in st.session_state:
-        load_cookies()
+        #load_cookies()
     return pymysql.connect(
         host=MYSQL_HOST,
         user=MYSQL_USER,
