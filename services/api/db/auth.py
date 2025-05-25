@@ -106,6 +106,9 @@ def verify_user(username, password, role):
             cookies["username"] = username
             cookies["role"] = role
             cookies.save()
+            return True
+        else:
+            return False
 
     elif role == "Instructor":
         cursor.execute("SELECT Password FROM Instructors WHERE AccountName = %s", (username,))
@@ -115,10 +118,10 @@ def verify_user(username, password, role):
             cookies["username"] = username
             cookies["role"] = role
             cookies.save()
+            return True
+        else:
+            return False
     
-    else:
-        st.error("Invalid login credentials/")
-        return False
     
 def load_cookies():
     if "username" not in st.session_state and cookies.get("username"):
