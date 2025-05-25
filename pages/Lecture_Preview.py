@@ -22,7 +22,7 @@ Visual.initial()
 # --- READ QUERY PARAMS ---
 params = st.query_params
 if "lecture_id" not in st.session_state:
-    switch_page(f"{st.session_state.role}_Courses")
+    switch_page(f"Courses")
 
 lecture_id = int(params.get("lecture_id", st.session_state.lecture_id))
 lec_detail = get_lecture_data(lecture_id)
