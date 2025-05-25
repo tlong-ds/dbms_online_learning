@@ -19,8 +19,6 @@ MYSQL_HOST = os.getenv("MYSQL_HOST")
 MYSQL_DB = os.getenv("MYSQL_DB")
 MYSQL_PORT = int(os.getenv("MYSQL_PORT"))
 
-FASTAPI_URL = "http://0.0.0.0:8000"
-
 def connect_db():
     try:
         return pymysql.connect(
@@ -118,19 +116,6 @@ def verify_user(username, password, role):
             cookies["role"] = role
             cookies.save()
     
-    
-    if "username" in st.session_state and "role" in st.session_state:
-        components.html(f"""
-            <script>
-                fetch("http://localhost:8000/set_cookie?username={st.session_state.username}&role={st.session_state.role}", {{
-                    method: "GET",
-                    credentials: "include"
-                }}).then(() => {{
-                    window.location.reload();
-                }});
-            </script>
-        """, height=0)
-        return True
     else:
         st.error("Invalid login credentials/")
         return False
@@ -142,8 +127,6 @@ def load_cookies():
         get_user_info(username, role)
         st.session_state.login = True
         st.rerun()
-
-        
     
 def get_user_info(username, role):
     conn = connect_db()
