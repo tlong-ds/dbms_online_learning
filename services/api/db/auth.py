@@ -105,21 +105,18 @@ def verify_user(username, password, role):
         data = cursor.fetchone()
         conn.close()
         if data and check_password(password, data[0]):
-            # cookies["username"] = username
-            # cookies["role"] = role
-            # cookies.save()
-            st.session_state.username = username
-            st.session_state.role = role
+            cookies["username"] = username
+            cookies["role"] = role
+            cookies.save()
+
     elif role == "Instructor":
         cursor.execute("SELECT Password FROM Instructors WHERE AccountName = %s", (username,))
         data = cursor.fetchone()
         conn.close()
         if data and check_password(password, data[0]):
-            # cookies["username"] = username
-            # cookies["role"] = role
-            # cookies.save()
-            st.session_state.username = username
-            st.session_state.role = role
+            cookies["username"] = username
+            cookies["role"] = role
+            cookies.save()
     
     
     if "username" in st.session_state and "role" in st.session_state:
@@ -137,13 +134,14 @@ def verify_user(username, password, role):
     else:
         st.error("Invalid login credentials/")
         return False
-# def #load_cookies():
-#     if "username" not in st.session_state and cookies.get("username"):
-#         username = cookies.get("username")
-#         role = cookies.get("role")
-#         get_user_info(username, role)
-#         st.session_state.login = True
-#         st.rerun()
+    
+def load_cookies():
+    if "username" not in st.session_state and cookies.get("username"):
+        username = cookies.get("username")
+        role = cookies.get("role")
+        get_user_info(username, role)
+        st.session_state.login = True
+        st.rerun()
 
         
     
@@ -159,7 +157,10 @@ def get_user_info(username, role):
         st.session_state.name = data[1]
         st.session_state.email = data[2]
         st.session_state.phone = data[3]
+        st.session_state.username = username
+        st.session_state.role = role
         conn.close()
+
     elif role == "Instructor":
         cursor.execute("SELECT InstructorID, InstructorName, Email, Expertise FROM Instructors WHERE AccountName = %s", (username,))
         data = cursor.fetchone()
@@ -167,6 +168,8 @@ def get_user_info(username, role):
         st.session_state.name = data[1]
         st.session_state.email = data[2]
         st.session_state.expertise = data[3]
+        st.session_state.username = username
+        st.session_state.role = role
         conn.close()
 
 def update_user_info(username, role, name, email, extra):

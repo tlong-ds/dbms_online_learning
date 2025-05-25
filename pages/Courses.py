@@ -5,8 +5,9 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="collapsed",
 )
-#from services.api.db.auth import load_cookies
-#load_cookies()
+from services.api.db.auth import load_cookies
+load_cookies()
+
 from streamlit_extras.switch_page_button import switch_page
 if "login" not in st.session_state:
     switch_page("Authentification")
@@ -17,6 +18,7 @@ from style.ui import Visual
 from services.api.courses import get_courses, courses_list, connect_db, get_instructed_courses, add_course, instructed_courses_list
 import pandas as pd
 from streamlit_searchbox import st_searchbox
+from streamlit_extras.switch_page_button import switch_page
 
 
 Visual.initial()
@@ -32,6 +34,7 @@ if st.session_state.role == "Learner":
                     filtered_df = df[df['Course Name'].str.lower().str.contains(search_term)]
                     return [(row['Course Name'], row['Course Name']) for _, row in filtered_df.iterrows()]
             return list(df["Course Name"])
+        
         search = st_searchbox(
             search_function=course_search,
             placeholder="Search",
@@ -40,6 +43,7 @@ if st.session_state.role == "Learner":
             rerun_scope="fragment",
             debounce=500
         )
+        
         if search:
             return search
 
@@ -169,7 +173,7 @@ if st.session_state.role == "Learner":
     with header_cols[0]:
         st.markdown(f'<div style="font-size: 18px; color: {"#000000" if st.session_state.theme == "dark" else "#f7fbfe"}"> .</div>', unsafe_allow_html=True) 
         search_fragment(df)
-    
+        
     st.write("Available Courses")
     if st.session_state.view == "list":
         courses_list(df)

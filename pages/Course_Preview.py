@@ -6,8 +6,9 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="collapsed",
 )
-#from services.api.db.auth import load_cookies
-#load_cookies()
+from services.api.db.auth import load_cookies
+load_cookies()
+
 from streamlit_extras.switch_page_button import switch_page
 if "login" not in st.session_state:
     switch_page("Authentification")

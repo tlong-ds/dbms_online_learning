@@ -1,5 +1,5 @@
 import streamlit as st
-#from services.api.db.auth import load_cookies
+from services.api.db.auth import load_cookies
 import json
 import os
 from dotenv import load_dotenv
@@ -27,7 +27,7 @@ s3 = boto3.client('s3',
 
 def connect_db():
     if "id" not in st.session_state:
-        #load_cookies()
+        load_cookies()
     return pymysql.connect(
         host=MYSQL_HOST,
         user=MYSQL_USER,
